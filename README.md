@@ -65,4 +65,4 @@ final class SendMessage extends \Spatie\LaravelData\Data {
 ![TonBlockchainLogo](/ton_logo_light_background.svg#gh-light-mode-only)
 
 Вы всегда можете отправить благодарность на чашку кофе или больше 😉 с помощью TON на мой кошелек
-`appto-wallet.ton`
+`developer01.ton`
