@@ -5,7 +5,7 @@ on:
     branches:
       - "main"
   schedule:
-    - cron: 10 0 * * *
+    - cron: 0 0 * * *
 env:
   repo: 'appto-dev/telegram-bot-cast'
   repo-directory: 'telegram-bot-cast'
@@ -172,5 +172,5 @@ jobs:
       - name: Create Release
         if: steps.check_update.outputs.hasUpdate == 'true'
         run: |
-          git tag ${{ needs.download-new-version.outputs.api_version }} -m "Beta ${{ needs.download-new-version.outputs.api_version }}"
+          # git tag ${{ needs.download-new-version.outputs.api_version }} -m "Beta ${{ needs.download-new-version.outputs.api_version }}"
           git push origin ${{ needs.download-new-version.outputs.api_version }} --tags
