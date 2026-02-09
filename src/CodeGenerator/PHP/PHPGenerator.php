@@ -35,7 +35,7 @@ class PHPGenerator implements GeneratorInterface
      * @param  string|null  $extends
      * @return void
      */
-    public function handle(string $file_source, string $extends = null): void {
+    public function handle(string $file_source, ?string $extends = null): void {
         $source = json_decode(file_get_contents($file_source));
         $documentation = $source->documentation;
 
@@ -78,9 +78,9 @@ class PHPGenerator implements GeneratorInterface
      */
     private function generate(
         mixed $class,
-        string $extends = null,
+        ?string $extends = null,
         array $contracts = [],
-        string $version = null
+        ?string $version = null
     ): PhpNamespace {
         $type = $this->typeGenerator->define($class);
 
@@ -243,7 +243,7 @@ class PHPGenerator implements GeneratorInterface
      * @param  string|null  $name
      * @return PhpNamespace
      */
-    private function getNamespace(string $name = null): PhpNamespace {
+    private function getNamespace(?string $name = null): PhpNamespace {
         $namespace = trim(self::NAMESPACE, '\\');
 
         if (!empty($namespace) && $name)
