@@ -30,7 +30,7 @@ jobs:
           git pull
           rm -rf ${{ env.repo-directory }}
           rm -rf ${{ env.laravel-directory }}
-          composer install --no-dev
+          composer install
 
       - name: Download version Telegram API
         id: download
