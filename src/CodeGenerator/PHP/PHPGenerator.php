@@ -32,10 +32,10 @@ class PHPGenerator implements GeneratorInterface
 
     /**
      * @param  string  $file_source
-     * @param  string|null  $extends
+     * @param  string|array|null  $extends
      * @return void
      */
-    public function handle(string $file_source, ?string $extends = null): void {
+    public function handle(string $file_source, string|array|null $extends = null): void {
         $source = json_decode(file_get_contents($file_source));
         $documentation = $source->documentation;
 
@@ -46,6 +46,10 @@ class PHPGenerator implements GeneratorInterface
 
         /* creating basic contracts for types and methods */
         $interfaces = $this->makeInterface();
+
+        if (is_array($extends)) {
+            $extends = null;
+        }
 
         /* creating classes for documentation types and methods */
         foreach ($documentation as $group) {

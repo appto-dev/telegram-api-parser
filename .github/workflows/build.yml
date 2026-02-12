@@ -82,7 +82,7 @@ jobs:
       - name: Generate files
         run: |
           rm -rf build
-          php console telegram:generate
+          php console telegram:generate php-new
 
       - name: Run PHP-CS-Fixer
         uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
@@ -145,7 +145,7 @@ jobs:
       - name: Generate files
         run: |
           rm -rf build
-          php console telegram:generate --useSpatie
+          php console telegram:generate php-new --useSpatie
 
       - name: Run PHP-CS-Fixer
         uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
