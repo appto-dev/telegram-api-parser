@@ -30,7 +30,7 @@ jobs:
           git pull
           rm -rf ${{ env.repo-directory }}
           rm -rf ${{ env.laravel-directory }}
-          composer install
+          composer install --no-dev
 
       - name: Download version Telegram API
         id: download
@@ -83,7 +83,9 @@ jobs:
         run: |
           rm -rf build
           php console telegram:generate
-          ./vendor/bin/php-cs-fixer fix
+
+      - name: Run PHP-CS-Fixer
+        uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
 
       - name: Copy files to repository
         run: |
@@ -144,7 +146,9 @@ jobs:
         run: |
           rm -rf build
           php console telegram:generate --useSpatie
-          ./vendor/bin/php-cs-fixer fix
+
+      - name: Run PHP-CS-Fixer
+        uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
 
       - name: Copy files to repository
         run: |
