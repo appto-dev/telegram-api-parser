@@ -39,19 +39,25 @@
 ])
 ```
 
-Для генерации расширенных классов используйте аргумент `--extends`:
+Для использования `Spatie/LaravelData` используйте команду с опцией
+`--useSpatie`, для классов с параметрами методов будет использовать `Spatie\LaravelData\Dto`,
+а для классов доступных типов `Spatie\LaravelData\Data`:
+
 ```shell
-php console telegram:generate --extends=\\Spatie\\LaravelData\\Data
+php console telegram:generate --useSpatie
+```
+
+Для расширения собственным классом используйте опцию `--extends`:
+```shell
+php console telegram:generate --extends=\\Your\\ClassName\\Data
 ```
 
 После чего, сгенерированные классы получат ваше расширение и все возможности нового класса:
 ```php
-final class SendMessage extends \Spatie\LaravelData\Data {
+final class SendMessage extends \Your\ClassName\Data {
     // ...
 }
 ```
-
-Важно! Ваш класс должен реализовывать метод `toArray()`.
 
 ## Зависимости
 

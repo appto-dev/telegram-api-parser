@@ -2,12 +2,16 @@
 
 namespace TelegramApiParser\Console;
 
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Dto;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use TelegramApiParser\CodeGenerator\NewPHP\Generator;
 use TelegramApiParser\CodeGenerator\PHP\PHPGenerator;
 
 class GenerateClassesCommand extends Command
@@ -17,11 +21,13 @@ class GenerateClassesCommand extends Command
     protected static $defaultDescription = 'Generates objects from the documentation.';
 
     private const GENERATORS = [
-        'php' => PHPGenerator::class
+        'php' => PHPGenerator::class,
+        'php-new' => Generator::class,
     ];
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $generator_key = $input->getArgument('generator');
+
         if (!in_array($generator_key, array_keys(self::GENERATORS), true)) {
             $output->writeln(sprintf('<error>Generator "%s" does not exist.</error>', $generator_key));
             return Command::FAILURE;
@@ -36,8 +42,15 @@ class GenerateClassesCommand extends Command
         $documentation_file = realpath(ParseCommand::VERSIONS_DIRECTORY.'/'.$version.'.json');
         $build_output = __DIR__ .'/../../build';
 
-        $generator = new (self::GENERATORS[$generator_key])($build_output);
-        $generator->handle($documentation_file, $input->getOption('extends'));
+        $generator = new (self::GENERATORS[$generator_key])($build_output, $output);
+
+        $extends = $input->getOption('extends');
+        $useSpatie = $input->getOption('useSpatie');
+        if ($useSpatie) {
+            $extends = ['methods' => Dto::class, 'types' => Data::class];
+        }
+
+        $generator->handle($documentation_file, $extends);
 
         return Command::SUCCESS;
     }
@@ -63,6 +76,8 @@ class GenerateClassesCommand extends Command
                 mode: InputOption::VALUE_OPTIONAL,
                 description: 'Which version of the API should I generate? Available: '. implode(', ', $versions),
                 default: $versions ? $versions[array_key_last($versions)] : null
-            )->addOption('extends', mode: InputOption::VALUE_OPTIONAL);
+            )
+            ->addOption('useSpatie', mode: InputOption::VALUE_NONE)
+            ->addOption('extends', mode: InputOption::VALUE_OPTIONAL);
     }
 }

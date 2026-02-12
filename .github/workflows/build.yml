@@ -83,6 +83,7 @@ jobs:
         run: |
           rm -rf build
           php console telegram:generate
+          ./vendor/bin/php-cs-fixer fix
 
       - name: Copy files to repository
         run: |
@@ -142,7 +143,8 @@ jobs:
       - name: Generate files
         run: |
           rm -rf build
-          php console telegram:generate --extends=\\Spatie\\LaravelData\\Data
+          php console telegram:generate --useSpatie
+          ./vendor/bin/php-cs-fixer fix
 
       - name: Copy files to repository
         run: |

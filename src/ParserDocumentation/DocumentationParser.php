@@ -196,6 +196,47 @@ class DocumentationParser
         return $data;
     }
 
+    private function removeImage(string $string): string
+    {
+        if (! str_contains($string, '<img')) {
+            return $string;
+        }
+
+        return preg_replace_callback(
+            '/<img\b[^>]*\balt="([^"]*)"[^>]*>/i',
+            function($matches) {
+                return $matches[1];
+            },
+            $string
+        );
+    }
+
+    private function updateLinks(string $text): string {
+//        return $text;
+        $baseUrl = self::BASE_URL;
+
+        return preg_replace_callback(
+            '/<a\s+href="([^"]+)"/i',
+            function ($matches) use ($baseUrl) {
+                $href = $matches[1];
+
+                // Если ссылка начинается с #
+                if (str_starts_with($href, '#')) {
+                    $href = $baseUrl . $href;
+                }
+                // Если ссылка начинается с /
+                elseif (str_starts_with($href, '/')) {
+                    $path = parse_url($baseUrl, PHP_URL_PATH);
+                    $domain = str_replace($path, '', $baseUrl);
+
+                    $href = $domain . $href;
+                }
+
+                return '<a href="' . $href . '"';
+            },
+            $text);
+    }
+
     /**
      * @param  array  $table
      * @return array
@@ -260,8 +301,18 @@ class DocumentationParser
      * @param  string  $text
      * @return string
      */
-    private function cleanFormatDescription(string $text): string {
+    private function cleanFormatDescription(string $text): string
+    {
         $text = str_replace(["\u{201c}", "\u{201d}", "\u{00bb}", '&lt;', '&gt;'], ['"', '"', '', '<', '>'], $text);
+
+        if (str_contains($text, '<img')) {
+            $text = $this->removeImage($text);
+        }
+
+        if (str_contains($text, '<a')) {
+            $text = $this->updateLinks($text);
+        }
+
         return trim($text);
     }
 
