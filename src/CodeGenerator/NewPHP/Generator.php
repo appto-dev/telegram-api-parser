@@ -148,7 +148,7 @@ class Generator implements GeneratorInterface
         $interface = $namespace->addInterface('TelegramBotInterface');
 
         foreach ($methods as $method) {
-            $method_interface = $interface->addMethod($method['name']);
+            $method_interface = $interface->addMethod($method['name'])->setPublic();
 
             if ($method['comment']) {
                 $method_interface->addComment(wordwrap($method['comment'], self::WRAP_LENGTH) . PHP_EOL);
