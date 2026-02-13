@@ -242,6 +242,7 @@ class ParserDocumentation
             $separator = $index === count($properties) - 1 ? '' : ",\n";
 
             $type = Types::convertToBuiltinType($property['type'], Generator::$namespaces['types']);
+            dump($type);
 
             if (str_contains($type, '|')) {
                 $_temp_types = [];
@@ -255,7 +256,7 @@ class ParserDocumentation
                         $this->bot_method_types[] = $item;
                     }
                 }
-                $type = implode('|', $_temp_types);
+                $type = implode('|', array_unique($_temp_types));
             }
 
             if (str_contains($type, Generator::$namespaces['types']) && !str_contains($type, '|')) {
@@ -269,7 +270,7 @@ class ParserDocumentation
                     $type .= '[]';
                 }
 
-                $type .= '|array';
+                //$type .= '|array';
             }
 
             $docblock .= "  ". $property['name'] . ($property['required'] ? null : '?') .': '. $type.$separator;
