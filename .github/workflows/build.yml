@@ -99,7 +99,7 @@ jobs:
           if git ls-files --other --exclude-standard --directory | grep -i "**"; then
             echo "hasUpdate=true" >> $GITHUB_OUTPUT
           else
-            echo "hasUpdate=true" >> $GITHUB_OUTPUT
+            echo "hasUpdate=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Push commit
@@ -162,7 +162,7 @@ jobs:
           if git ls-files --other --exclude-standard --directory | grep -i "**"; then
             echo "hasUpdate=true" >> $GITHUB_OUTPUT
           else
-            echo "hasUpdate=true" >> $GITHUB_OUTPUT
+            echo "hasUpdate=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Push commit
