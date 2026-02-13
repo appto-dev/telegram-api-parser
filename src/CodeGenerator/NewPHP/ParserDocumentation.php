@@ -242,7 +242,6 @@ class ParserDocumentation
             $separator = $index === count($properties) - 1 ? '' : ",\n";
 
             $type = Types::convertToBuiltinType($property['type'], Generator::$namespaces['types']);
-            dump($type);
 
             if (str_contains($type, '|')) {
                 $_temp_types = [];
