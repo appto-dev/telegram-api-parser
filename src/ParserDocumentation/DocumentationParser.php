@@ -66,7 +66,6 @@ class DocumentationParser
                             ? $this->makeObjectParameters($table)
                             : $this->makeMethodParameters($table),
                     ];
-
                 } else {
                     $data = [
                         'name' => $section->first('h4')->text(),
@@ -87,6 +86,10 @@ class DocumentationParser
 
                 /* Is method? */
                 $data['return'] = $this->defineReturnType($data['description'], $data['name']);
+
+                if (str_contains($data['description'], '<a')) {
+                    $data['description'] = $this->updateLinks($data['description']);
+                }
 
                 $groupResult['sections'][] = array_filter($data);
             }
@@ -309,10 +312,6 @@ class DocumentationParser
             $text = $this->removeImage($text);
         }
 
-        if (str_contains($text, '<a')) {
-            $text = $this->updateLinks($text);
-        }
-
         return trim($text);
     }
 
@@ -340,13 +339,21 @@ class DocumentationParser
      * @throws InvalidSelectorException
      */
     private function defineReturnType(string $description, $name): string|array|null {
-        if (!str_contains(strtolower($description), 'return'))
+        $hasMethodReturnPhrase =
+            preg_match('/\bReturns\b/i', $description) === 1
+            || preg_match('/\bOn success\b/i', $description) === 1;
+
+        if (! $hasMethodReturnPhrase) {
             return null;
+        }
 
         $sentences = array_filter(explode('. ', $description), function($row) {
             $row = trim($row);
-            return (str_contains($row, 'Returns') || str_contains($row, 'return ') || str_contains($row, 'On success'))
-                && (str_contains($row, '<a') || str_contains($row, '<em>'));
+
+            return (
+                    preg_match('/\bReturns\b/i', $row) === 1
+                    || preg_match('/\bOn success\b/i', $row) === 1
+                ) && (str_contains($row, '<a') || str_contains($row, '<em>'));
         });
 
         if (!$sentences)
