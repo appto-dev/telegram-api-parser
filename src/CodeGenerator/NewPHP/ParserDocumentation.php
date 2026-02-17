@@ -89,7 +89,7 @@ class ParserDocumentation
 
                 if (isset($section['return'])) {
                     $class['return'] = $this->normalizeType($section['return'], $class['types']);
-                    $class['properties_array_docblock'] = $this->generateArrayDocBlock($class['properties']);
+                    // $class['properties_array_docblock'] = $this->generateArrayDocBlock($class['properties']);
                 }
 
                 foreach ($class['types'] as $index => $type) {
@@ -233,49 +233,6 @@ class ParserDocumentation
         }
 
         return null;
-    }
-
-    private function generateArrayDocBlock(array $properties): ?string
-    {
-        $docblock = '';
-        foreach ($properties as $index => $property) {
-            $separator = $index === count($properties) - 1 ? '' : ",\n";
-
-            $type = Types::convertToBuiltinType($property['type'], Generator::$namespaces['types']);
-
-            if (str_contains($type, '|')) {
-                $_temp_types = [];
-                foreach (explode('|', $type) as $item) {
-                    $_temp_types[] = $this->class_basename($item);
-
-                    if (! Types::isBuiltinType($item) && str_contains($item, Generator::$namespaces['types'])) {
-                        // @todo можно добавить такие же подсказки по полям класса $item в array {}
-                        $_temp_types[] = 'array';
-
-                        $this->bot_method_types[] = $item;
-                    }
-                }
-                $type = implode('|', array_unique($_temp_types));
-            }
-
-            if (str_contains($type, Generator::$namespaces['types']) && !str_contains($type, '|')) {
-                $this->bot_method_types[] = $type;
-            }
-
-            $type = $this->class_basename($type);
-
-            if (! Types::isBuiltinType($type)) {
-                if (str_contains($property['type'], '[]')) {
-                    $type .= '[]';
-                }
-
-                //$type .= '|array';
-            }
-
-            $docblock .= "  ". $property['name'] . ($property['required'] ? null : '?') .': '. $type.$separator;
-        }
-
-        return $docblock ? "array{\n{$docblock}\n} \$dto" . PHP_EOL : null;
     }
 
     public function class_basename($class_name): string

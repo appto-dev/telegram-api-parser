@@ -10,7 +10,7 @@ use TelegramApiParser\CodeGenerator\GeneratorInterface;
 class Generator implements GeneratorInterface
 {
     protected const NAMESPACE = 'Appto\\TelegramBot';
-    const WRAP_LENGTH = 80;
+    const WRAP_LENGTH = 110;
     private array $resolved = [];
 
     private array $temp_use = [];
@@ -41,32 +41,36 @@ class Generator implements GeneratorInterface
 
         $this->output->writeln('------------------------------------------------');
         $this->output->writeln(sprintf('<info>      %s</info>', $content['version_string']));
-        $this->output->writeln('------------------------------------------------' . PHP_EOL);
+        $this->output->writeln('------------------------------------------------');
 
         $this->parser = new ParserDocumentation();
 
         $documentation = $this->parser->handle($content['documentation']);
 
         // make interfaces
+        $this->output->writeln('Creating interfaces...');
         $this->creatingInterfaces($this->parser->getInterfaces());
 
         // make available types
+        $this->output->writeln('Creating types...');
         $types = array_filter($documentation, fn($item) => in_array(ParserDocumentation::INTERFACE_NAMES['type'], $item['interfaces']));
         $this->creatingClasses($types, self::$namespaces['types'], is_array($extends) ? $extends['types'] : $extends);
 
         // make available methods
+        $this->output->writeln('Creating methods...');
         $methods = array_filter($documentation, fn($item) => in_array(ParserDocumentation::INTERFACE_NAMES['method'], $item['interfaces']));
         $this->creatingClasses($methods, self::$namespaces['methods'], is_array($extends) ? $extends['methods'] : $extends);
 
         // make telegram bot interface
+        $this->output->writeln('Creating TelegramBotInterface...');
         $this->makeTelegramBotInterface($methods);
+
+        $this->output->writeln('<info>Done!</info>');
     }
 
     private function creatingInterfaces(array $interfaces): void
     {
         $namespace_name = self::$namespaces['interfaces'];
-
-        $this->output->writeln(sprintf('<info>Namespace <comment>%s</comment> created</info>', $namespace_name));
 
         // interfaces for available types
         foreach (array_keys($interfaces) as $name) {
@@ -93,8 +97,6 @@ class Generator implements GeneratorInterface
 
     private function creatingClasses(array $types, string $namespace_name, ?string $extends = null): void
     {
-        $this->output->writeln(sprintf('<info>Namespace <comment>%s</comment> created</info>', $namespace_name) . PHP_EOL);
-
         $this->temp_use = [];
         foreach ($types as $type) {
             $this->temp_use = [];
@@ -148,6 +150,8 @@ class Generator implements GeneratorInterface
         $interface = $namespace->addInterface('TelegramBotInterface');
 
         foreach ($methods as $method) {
+            $docblock = DocBlock::make($method['properties']);
+
             $method_interface = $interface->addMethod($method['name'])->setPublic();
 
             if ($method['comment']) {
@@ -156,9 +160,9 @@ class Generator implements GeneratorInterface
 
             if ($method['properties']) {
                 $parameter_dto = Types::convertToBuiltinType(ucfirst($method['name']), self::$namespaces['methods']);
-                $parameter = $this->parser->class_basename($parameter_dto).'|'.($method['properties_array_docblock'] ?? 'array');
+                $parameter = $this->parser->class_basename($parameter_dto).'|'.($docblock ?? 'array');
 
-                $method_interface->addComment('@param '.$parameter);
+                $method_interface->addComment('@param '.$parameter .' $dto');
 
                 $this->addUse($namespace, $parameter_dto);
             }
@@ -186,13 +190,13 @@ class Generator implements GeneratorInterface
             if ($method['properties']) {
                 $method_interface->addParameter('dto')->setType($parameter_dto.'|array');
             }
-        }
 
-        $bot_method_types = $this->parser->getBotMethodTypes();
-        if ($bot_method_types) {
-            sort($bot_method_types);
-            foreach ($bot_method_types as $type) {
-                $this->addUse($namespace, $this->resolved[$this->parser->class_basename($type)] ?? $type);
+            $bot_method_types = DocBlock::getRecurseTypes($method['properties']);
+            if ($bot_method_types) {
+                sort($bot_method_types);
+                foreach ($bot_method_types as $type) {
+                    $this->addUse($namespace, $this->resolved[$this->parser->class_basename($type)] ?? $type);
+                }
             }
         }
 
@@ -220,8 +224,6 @@ class Generator implements GeneratorInterface
         file_put_contents($filepath, $content);
 
         $this->resolved[$name] = $namespace->getName() .'\\'. $name;
-
-        $this->output->writeln(sprintf('File <comment>%s</comment> created', basename($filepath)));
     }
 
     private function addUse(PhpNamespace $namespace, string $type): void

@@ -35,7 +35,7 @@ class DocBlock
 
                 if (class_exists($telegram_type)) {
                     $extract_class = self::extractByClass($telegram_type);
-                    return $clear_type .'|array<'. $extract_class.'>';
+                    return $type .'|array<'. $extract_class.'>';
                 }
 
                 return $clear_type;
