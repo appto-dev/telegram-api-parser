@@ -121,21 +121,28 @@ class Generator implements GeneratorInterface
                 $method = $class->addMethod('__construct');
 
                 foreach ($type['properties'] as $property) {
-                    $type_string = Types::convertToBuiltinType($property['type'], self::$namespaces['types']);
+                    $is_array = str_contains($property['type'], '[]');
+                    $use_type = Types::convertToBuiltinType($property['type'], self::$namespaces['types']);
+                    $property_type = $use_type;
 
                     $clear_type = str_replace('[]', '', $property['type']);
                     if ($clear_type == $type['name']) continue;
 
                     if (isset($this->parser->getInterfaces()[$clear_type])) {
-                        $type_string = $this->resolved[$clear_type];
+                        $use_type = $this->resolved[$clear_type];
+                        $property_type = $is_array ? 'array' : $use_type;
+                    } elseif ($is_array) {
+                        $property_type = 'array';
                     }
 
-                    $this->addUse($namespace, $type_string);
+                    $this->addUse($namespace, $use_type);
+
+                    $var_docs = $is_array ? PHP_EOL . '@var '. $property['type'] : null;
 
                     $method
                         ->addPromotedParameter($property['name'])
-                        ->addComment(wordwrap($property['comment'], self::WRAP_LENGTH))
-                        ->setType($type_string)
+                        ->addComment(wordwrap($property['comment'], self::WRAP_LENGTH) . $var_docs)
+                        ->setType($property_type)
                         ->setNullable(!$property['required']);
                 }
             }
