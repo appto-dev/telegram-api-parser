@@ -87,6 +87,8 @@ class DocBlock
 
         $properties = [];
         foreach ($reflection->getProperties() as $property) {
+            if ($property->getModifiers() !== 1) continue;
+
             $types = $property->getType() instanceof \ReflectionUnionType
                 ? $property->getType()->getTypes()
                 : [ $property->getType() ];
