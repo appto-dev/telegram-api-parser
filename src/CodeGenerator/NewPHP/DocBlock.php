@@ -63,7 +63,6 @@ class DocBlock
                 if (class_exists($telegram_type)) {
                     $types[$index] = $item .'|'. self::extractByClass($telegram_type);
                 }
-
             }
 
             return implode('|', $types);

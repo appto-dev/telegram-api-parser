@@ -137,7 +137,16 @@ class Generator implements GeneratorInterface
 
                     $this->addUse($namespace, $use_type);
 
-                    $var_docs = $is_array ? PHP_EOL . '@var '. $property['type'] : null;
+                    $var_type = $property['type'];
+                    $array_level = substr_count($var_type, '[]');
+                    if ($is_array) {
+                        $var_type = str_replace('[]', '', $var_type);
+                        for ($i = 0; $i < $array_level; $i++) {
+                            $var_type = 'array<'. $var_type .'>';
+                        }
+                    }
+
+                    $var_docs = $is_array ? PHP_EOL . '@var '. $var_type : null;
 
                     $method
                         ->addPromotedParameter($property['name'])

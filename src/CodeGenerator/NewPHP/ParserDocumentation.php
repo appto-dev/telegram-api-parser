@@ -37,8 +37,11 @@ class ParserDocumentation
     {
         $classes = [];
 
+        // собираем все интерфейсы
         foreach ($documentation as $group) {
-            if (in_array($group['name'], self::EXCLUDE_GROUP_NAMES, true)) continue;
+            if (in_array($group['name'], self::EXCLUDE_GROUP_NAMES, true)) {
+                continue;
+            }
 
             foreach ($group['sections'] as $section) {
                 if (str_contains($section['name'], ' ')) continue;
@@ -46,24 +49,35 @@ class ParserDocumentation
                 // объединит типы в интерфейсы
                 if (! isset($section['parameters'])) {
                     if (! isset($section['return']) && (
-                        strpos(strtolower($section['description']), "be one of") !== false ||
-                        strpos(strtolower($section['description']), "- <a href=") !== false
-                    )) {
+                            strpos(strtolower($section['description']), "be one of") !== false ||
+                            strpos(strtolower($section['description']), "- <a href=") !== false
+                        )) {
                         $this->addInterface($section['name'], $section['description']);
-                        continue;
                     }
                 }
+            }
+        }
+
+        foreach ($documentation as $group) {
+            if (in_array($group['name'], self::EXCLUDE_GROUP_NAMES, true)) continue;
+
+            foreach ($group['sections'] as $section) {
+                if (str_contains($section['name'], ' ') || isset($this->getInterfaces()[$section['name']])) continue;
 
                 $class = [
                     'name' => $section['name'],
                     'comment' => $section['description'],
                     'types' => [],
-                    'interfaces' => array_filter([
+                    'interfaces' => array_unique(array_filter([
                         isset($section['return']) ? self::INTERFACE_NAMES['method'] : self::INTERFACE_NAMES['type'],
-                        $this->useInterface($section['name'])
-                    ]),
+                        ...$this->useInterface($section['name'])
+                    ])),
                     'properties' => [],
                 ];
+
+                if ($class['name'] == 'InputMedia') {
+                    dd($class);
+                }
 
                 if (isset($section['parameters'])) {
                     // обработка параметров класса
@@ -89,7 +103,6 @@ class ParserDocumentation
 
                 if (isset($section['return'])) {
                     $class['return'] = $this->normalizeType($section['return'], $class['types']);
-                    // $class['properties_array_docblock'] = $this->generateArrayDocBlock($class['properties']);
                 }
 
                 foreach ($class['types'] as $index => $type) {
@@ -225,14 +238,16 @@ class ParserDocumentation
         return $a === $b;
     }
 
-    private function useInterface(string $name): ?string {
+    private function useInterface(string $name): ?array {
+        $interfaces = [];
+
         foreach ($this->interfaces as $interface => $data) {
             if (in_array($name, $data['items'])) {
-                return $interface;
+                $interfaces[] = $interface;
             }
         }
 
-        return null;
+        return $interfaces ?? null;
     }
 
     public function class_basename($class_name): string
