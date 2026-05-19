@@ -10,7 +10,7 @@ use TelegramApiParser\CodeGenerator\GeneratorInterface;
 class Generator implements GeneratorInterface
 {
     protected const NAMESPACE = 'Appto\\TelegramBot';
-    const WRAP_LENGTH = 110;
+    const WRAP_LENGTH = 120;
     private array $resolved = [];
 
     private array $temp_use = [];
@@ -46,6 +46,9 @@ class Generator implements GeneratorInterface
         $this->parser = new ParserDocumentation();
 
         $documentation = $this->parser->handle($content['documentation']);
+
+        // copy Support dir
+        $this->copyDirectory(__DIR__ . '/Support');
 
         // make interfaces
         $this->output->writeln('Creating interfaces...');
@@ -98,8 +101,10 @@ class Generator implements GeneratorInterface
     private function creatingClasses(array $types, string $namespace_name, ?string $extends = null): void
     {
         $this->temp_use = [];
+
         foreach ($types as $type) {
             $this->temp_use = [];
+            $isUsedInterface = [];
 
             $namespace = new PhpNamespace($namespace_name);
 
@@ -129,6 +134,10 @@ class Generator implements GeneratorInterface
                     if ($clear_type == $type['name']) continue;
 
                     if (isset($this->parser->getInterfaces()[$clear_type])) {
+                        if (!in_array($clear_type, $isUsedInterface)) {
+                            $isUsedInterface[$property['name']] = $clear_type;
+                        }
+
                         $use_type = $this->resolved[$clear_type];
                         $property_type = $is_array ? 'array' : $use_type;
                     } elseif ($is_array) {
@@ -154,6 +163,11 @@ class Generator implements GeneratorInterface
                         ->setType($property_type)
                         ->setNullable(!$property['required']);
                 }
+            }
+
+            if ($isUsedInterface) {
+                // добавит в класс метод pipeline
+                $this->makePipelineMethod($class, $isUsedInterface);
             }
 
             $this->writeToFile($namespace);
@@ -280,5 +294,94 @@ class Generator implements GeneratorInterface
         $printer->indentation = '    ';
 
         return $printer;
+    }
+
+    private function copyDirectory(string $directory)
+    {
+        $base_path = realpath(__DIR__);
+
+        if (! file_exists($this->outputDirectory)) {
+            mkdir($this->outputDirectory, 0755, true);
+        }
+
+        $output_path = realpath($this->outputDirectory);
+
+        $from_directory = $directory;
+
+        $namespace_path = str_replace('\\', '/', self::NAMESPACE);
+        $to_directory = $output_path .'/'. $namespace_path . str_replace($base_path, '', $directory);
+
+        if (! file_exists($to_directory)) {
+            mkdir($to_directory, 0755, true);
+        }
+
+        foreach (glob($from_directory . '/*') as $file) {
+            if (is_dir($file)) {
+                $this->copyDirectory($file);
+                return;
+            }
+
+            copy($file, $to_directory .'/'. basename($file));
+        }
+    }
+
+    private function makePipelineMethod(\Nette\PhpGenerator\ClassType $class, array $for)
+    {
+        $namespace = 'TelegramApiParser\\CodeGenerator\\NewPHP\\PreparePipelineMethods';
+
+        $classname = $class->getName();
+        $preparePipelineClass = $namespace .'\\'. $classname;
+
+        if (class_exists($preparePipelineClass)) {
+            $reflection = new \ReflectionClass($preparePipelineClass);
+            $method = $reflection->getMethod('__invoke');
+
+            $file = file($method->getFileName());
+
+            $start = $method->getStartLine() + 1;
+            $end   = $method->getEndLine() - 1;
+
+            $lines = array_slice($file, $start, $end - $start);
+
+            $body = trim(implode('', $lines));
+
+            $use = array_values(
+                array_filter($file, fn($row) => str_starts_with($row, 'use'))
+            );
+
+            if ($use) {
+                foreach ($use as $item) {
+                    $use_class = trim(substr($item, 4, -2));
+                    $this->addUse($class->getNamespace(), $use_class);
+                }
+            }
+
+            $class->addMethod('prepareForPipeline')
+                ->setStatic()
+                ->setPublic()
+                ->setReturnType('array')
+                ->setBody($body)
+                ->addParameter('properties')->setType('array');
+        } else {
+            $namespace = new PhpNamespace($namespace);
+            $namespace->addClass($classname)->addMethod('__invoke')
+                ->setPublic()
+                ->setComment(sprintf('for: %s (%s)', implode(', ', array_keys($for)), implode(', ', $for)))
+                ->setReturnType('array')
+                ->setBody('return $properties;')
+                ->addParameter('properties')->setType('array');
+
+            $printer = $this->getPrinter();
+
+            $name = array_key_first($namespace->getClasses());
+
+            $filepath = sprintf('%s/%s.php', __DIR__ . '/PreparePipelineMethods', $name);
+
+            $content = '<?php' . PHP_EOL . $printer->printNamespace($namespace);
+
+            file_put_contents($filepath, $content);
+
+            dump('⚠️ Опишите метод __invoke для класса ' . $name);
+        }
     }
 }

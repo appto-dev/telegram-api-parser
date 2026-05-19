@@ -39,6 +39,9 @@ class GenerateClassesCommand extends Command
             return Command::FAILURE;
         }
 
+        $decimal = strlen(explode('.', $version)[1] ?? '0');
+        $version = number_format($version, $decimal);
+
         $documentation_file = realpath(ParseCommand::VERSIONS_DIRECTORY.'/'.$version.'.json');
         $build_output = __DIR__ .'/../../build';
 
@@ -52,6 +55,8 @@ class GenerateClassesCommand extends Command
 
         $generator->handle($documentation_file, $extends);
 
+        exec('./vendor/bin/php-cs-fixer fix');
+
         return Command::SUCCESS;
     }
 
@@ -59,10 +64,12 @@ class GenerateClassesCommand extends Command
         $versions = [];
 
         foreach (glob(ParseCommand::VERSIONS_DIRECTORY . '/*.json') as $file_version) {
-            $versions[] = str_replace('.json', '', basename($file_version));
+            $versions[] = floatval(str_replace('.json', '', basename($file_version)));
         }
 
-        return $versions;
+        sort($versions);
+
+        return array_values($versions);
     }
 
     protected function configure(): void {
