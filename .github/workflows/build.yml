@@ -6,6 +6,13 @@ on:
       - "main"
   schedule:
     - cron: 0 0 * * *
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: 'Force release even if no changes detected'
+        required: false
+        default: 'false'
+        type: boolean
 env:
   repo: 'appto-dev/telegram-bot-cast'
   repo-directory: 'telegram-bot-cast'
@@ -17,6 +24,7 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       api_version: ${{ steps.download.outputs.api_version }}
+      release_tag: ${{ steps.tag.outputs.release_tag }}
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,7 +46,11 @@ jobs:
         run: |
           echo "api_version=$(php console telegram:parse)" >> $GITHUB_OUTPUT
 
-      # FIX: проверяем и untracked и modified файлы
+      - name: Compute release tag
+        id: tag
+        run: |
+          echo "release_tag=${{ vars.RELEASE_MAJOR }}.${{ vars.RELEASE_MINOR }}.v${{ steps.download.outputs.api_version }}" >> $GITHUB_OUTPUT
+
       - name: Has new version
         id: requires_update
         run: |
@@ -54,7 +66,7 @@ jobs:
           git add .
           git config --global user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config --global user.name "${{ github.actor }}"
-          git commit -m "[BOT] Version ${{ steps.download.outputs.api_version }} of the Telegram Bot API has been added"
+          git commit -m "[BOT] API ${{ steps.download.outputs.api_version }} | release ${{ steps.tag.outputs.release_tag }}"
           git push
 
   update-repo:
@@ -94,7 +106,6 @@ jobs:
           rm -rf ${{ env.repo-directory }}/src
           mv build/Appto/TelegramBot ${{ env.repo-directory }}/src
 
-      # FIX: git status --porcelain ловит и новые и изменённые файлы
       - name: Check update
         id: check_update
         run: |
@@ -106,22 +117,23 @@ jobs:
           fi
 
       - name: Push commit
-        if: steps.check_update.outputs.hasUpdate == 'true'
+        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.repo-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config user.name "${{ github.actor }}"
           git add .
-          git commit -m "[BOT] Version ${{ needs.download-new-version.outputs.api_version }} of the Telegram Bot API has been added"
+          git diff --staged --quiet || git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
           git push origin main
 
-      # FIX: тег создаётся и пушится в правильной директории репозитория
       - name: Create Release
-        if: steps.check_update.outputs.hasUpdate == 'true'
+        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.repo-directory }}
-          TAG="${{ needs.download-new-version.outputs.api_version }}"
-          git tag "$TAG" -m "Version $TAG"
+          TAG="${{ needs.download-new-version.outputs.release_tag }}"
+          git tag -d "$TAG" 2>/dev/null || true
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+          git tag "$TAG" -m "Version $TAG (Telegram API ${{ needs.download-new-version.outputs.api_version }})"
           git push origin "$TAG"
 
   update-laravel-version-repo:
@@ -172,20 +184,21 @@ jobs:
           fi
 
       - name: Push commit
-        if: steps.check_update.outputs.hasUpdate == 'true'
+        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.laravel-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config user.name "${{ github.actor }}"
           git add .
-          git commit -m "[BOT] Version ${{ needs.download-new-version.outputs.api_version }} of the Telegram Bot API has been added"
+          git diff --staged --quiet || git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
           git push origin main
 
-      # FIX: раскомментирован тег + правильная директория
       - name: Create Release
-        if: steps.check_update.outputs.hasUpdate == 'true'
+        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.laravel-directory }}
-          TAG="${{ needs.download-new-version.outputs.api_version }}"
-          git tag "$TAG" -m "Version $TAG"
+          TAG="${{ needs.download-new-version.outputs.release_tag }}"
+          git tag -d "$TAG" 2>/dev/null || true
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+          git tag "$TAG" -m "Version $TAG (Telegram API ${{ needs.download-new-version.outputs.api_version }})"
           git push origin "$TAG"
