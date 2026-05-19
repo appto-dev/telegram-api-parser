@@ -11,13 +11,14 @@ env:
   repo-directory: 'telegram-bot-cast'
   laravel-repo: 'appto-dev/telegram-bot-cast-laravel'
   laravel-directory: 'telegram-bot-cast-laravel'
+
 jobs:
   download-new-version:
     runs-on: ubuntu-22.04
     outputs:
       api_version: ${{ steps.download.outputs.api_version }}
     steps:
-      - name: Setup PHP with PECL extension
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -37,10 +38,11 @@ jobs:
         run: |
           echo "api_version=$(php console telegram:parse)" >> $GITHUB_OUTPUT
 
+      # FIX: проверяем и untracked и modified файлы
       - name: Has new version
         id: requires_update
         run: |
-          if git ls-files --other --exclude-standard --directory | grep -i "**"; then
+          if [[ -n "$(git status --porcelain)" ]]; then
             echo "hasUpdate=true" >> $GITHUB_OUTPUT
           else
             echo "hasUpdate=false" >> $GITHUB_OUTPUT
@@ -59,12 +61,12 @@ jobs:
     runs-on: ubuntu-22.04
     needs: download-new-version
     steps:
-      - name: Setup PHP with PECL extension
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      - name: Checkout
+      - name: Checkout api-parser
         uses: actions/checkout@v4
 
       - name: Install deps
@@ -72,11 +74,11 @@ jobs:
           git pull
           composer install --no-dev
 
-      - name: Checkout
+      - name: Checkout target repo
         uses: actions/checkout@v4
         with:
           token: '${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}'
-          repository: ${{env.repo}}
+          repository: ${{ env.repo }}
           path: ${{ env.repo-directory }}
 
       - name: Generate files
@@ -92,11 +94,12 @@ jobs:
           rm -rf ${{ env.repo-directory }}/src
           mv build/Appto/TelegramBot ${{ env.repo-directory }}/src
 
+      # FIX: git status --porcelain ловит и новые и изменённые файлы
       - name: Check update
         id: check_update
         run: |
           cd ${{ env.repo-directory }}
-          if git ls-files --other --exclude-standard --directory | grep -i "**"; then
+          if [[ -n "$(git status --porcelain)" ]]; then
             echo "hasUpdate=true" >> $GITHUB_OUTPUT
           else
             echo "hasUpdate=false" >> $GITHUB_OUTPUT
@@ -106,28 +109,31 @@ jobs:
         if: steps.check_update.outputs.hasUpdate == 'true'
         run: |
           cd ${{ env.repo-directory }}
+          git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
+          git config user.name "${{ github.actor }}"
           git add .
-          git config --global user.email "${{ secrets.REPOSITORY_EMAIL }}"
-          git config --global user.name "${{ github.actor }}"
           git commit -m "[BOT] Version ${{ needs.download-new-version.outputs.api_version }} of the Telegram Bot API has been added"
           git push origin main
 
+      # FIX: тег создаётся и пушится в правильной директории репозитория
       - name: Create Release
         if: steps.check_update.outputs.hasUpdate == 'true'
         run: |
-          git tag ${{ needs.download-new-version.outputs.api_version }}-v1.0 -m "version ${{ needs.download-new-version.outputs.api_version }}"
-          git push origin ${{ needs.download-new-version.outputs.api_version }} --tags
+          cd ${{ env.repo-directory }}
+          TAG="${{ needs.download-new-version.outputs.api_version }}"
+          git tag "$TAG" -m "Version $TAG"
+          git push origin "$TAG"
 
   update-laravel-version-repo:
     runs-on: ubuntu-22.04
     needs: download-new-version
     steps:
-      - name: Setup PHP with PECL extension
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      - name: Checkout
+      - name: Checkout api-parser
         uses: actions/checkout@v4
 
       - name: Install deps
@@ -135,11 +141,11 @@ jobs:
           git pull
           composer install --no-dev
 
-      - name: Checkout
+      - name: Checkout target repo
         uses: actions/checkout@v4
         with:
           token: '${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}'
-          repository: ${{env.laravel-repo}}
+          repository: ${{ env.laravel-repo }}
           path: ${{ env.laravel-directory }}
 
       - name: Generate files
@@ -159,7 +165,7 @@ jobs:
         id: check_update
         run: |
           cd ${{ env.laravel-directory }}
-          if git ls-files --other --exclude-standard --directory | grep -i "**"; then
+          if [[ -n "$(git status --porcelain)" ]]; then
             echo "hasUpdate=true" >> $GITHUB_OUTPUT
           else
             echo "hasUpdate=false" >> $GITHUB_OUTPUT
@@ -169,14 +175,17 @@ jobs:
         if: steps.check_update.outputs.hasUpdate == 'true'
         run: |
           cd ${{ env.laravel-directory }}
+          git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
+          git config user.name "${{ github.actor }}"
           git add .
-          git config --global user.email "${{ secrets.REPOSITORY_EMAIL }}"
-          git config --global user.name "${{ github.actor }}"
           git commit -m "[BOT] Version ${{ needs.download-new-version.outputs.api_version }} of the Telegram Bot API has been added"
           git push origin main
 
+      # FIX: раскомментирован тег + правильная директория
       - name: Create Release
         if: steps.check_update.outputs.hasUpdate == 'true'
         run: |
-          # git tag ${{ needs.download-new-version.outputs.api_version }}-v1.0 -m "version ${{ needs.download-new-version.outputs.api_version }}"
-          git push origin ${{ needs.download-new-version.outputs.api_version }} --tags
+          cd ${{ env.laravel-directory }}
+          TAG="${{ needs.download-new-version.outputs.api_version }}"
+          git tag "$TAG" -m "Version $TAG"
+          git push origin "$TAG"
