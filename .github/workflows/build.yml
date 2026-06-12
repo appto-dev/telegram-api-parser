@@ -78,78 +78,78 @@ jobs:
           git diff --staged --quiet || git commit -m "[BOT] API ${{ steps.download.outputs.api_version }} | release ${{ steps.tag.outputs.release_tag }}"
           git push
 
-  update-repo:
-    runs-on: ubuntu-22.04
-    needs: download-new-version
-    if: needs.download-new-version.outputs.has_new_version == 'true' || inputs.force_release == 'true'
-    steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
+  # update-repo:
+  #   runs-on: ubuntu-22.04
+  #   needs: download-new-version
+  #   if: needs.download-new-version.outputs.has_new_version == 'true' || inputs.force_release == 'true'
+  #   steps:
+  #     - name: Setup PHP
+  #       uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: '8.2'
 
-      - name: Checkout api-parser (latest main)
-        uses: actions/checkout@v4
-        with:
-          ref: main
+  #     - name: Checkout api-parser (latest main)
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: main
 
-      - name: Install deps
-        run: |
-          composer install --no-dev
+  #     - name: Install deps
+  #       run: |
+  #         composer install --no-dev
 
-      - name: Checkout target repo
-        uses: actions/checkout@v4
-        with:
-          token: '${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}'
-          repository: ${{ env.repo }}
-          path: ${{ env.repo-directory }}
+  #     - name: Checkout target repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         token: '${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}'
+  #         repository: ${{ env.repo }}
+  #         path: ${{ env.repo-directory }}
 
-      - name: Generate files
-        run: |
-          rm -rf build
-          php console telegram:generate php-new
+  #     - name: Generate files
+  #       run: |
+  #         rm -rf build
+  #         php console telegram:generate php-new
 
-      - name: Run PHP-CS-Fixer
-        uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
+  #     - name: Run PHP-CS-Fixer
+  #       uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
 
-      - name: Switch target repo to branch
-        run: |
-          cd ${{ env.repo-directory }}
-          git fetch origin main
-          git checkout main
-          git pull origin main
-          git checkout -B "bot/api-${{ needs.download-new-version.outputs.api_version }}"
+  #     - name: Switch target repo to branch
+  #       run: |
+  #         cd ${{ env.repo-directory }}
+  #         git fetch origin main
+  #         git checkout main
+  #         git pull origin main
+  #         git checkout -B "bot/api-${{ needs.download-new-version.outputs.api_version }}"
 
-      - name: Copy files to repository
-        run: |
-          rm -rf ${{ env.repo-directory }}/src
-          mv build/Appto/TelegramBot ${{ env.repo-directory }}/src
+  #     - name: Copy files to repository
+  #       run: |
+  #         rm -rf ${{ env.repo-directory }}/src
+  #         mv build/Appto/TelegramBot ${{ env.repo-directory }}/src
 
-      - name: Push branch and create PR
-        env:
-          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
-        run: |
-          cd ${{ env.repo-directory }}
-          git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
-          git config user.name "${{ github.actor }}"
-          git add .
+  #     - name: Push branch and create PR
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
+  #       run: |
+  #         cd ${{ env.repo-directory }}
+  #         git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
+  #         git config user.name "${{ github.actor }}"
+  #         git add .
 
-          if git diff --staged --quiet; then
-            echo "Нет изменений, PR не создаётся"
-            exit 0
-          fi
+  #         if git diff --staged --quiet; then
+  #           echo "Нет изменений, PR не создаётся"
+  #           exit 0
+  #         fi
 
-          BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
-          git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin "$BRANCH" --force
+  #         BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
+  #         git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
+  #         git push origin "$BRANCH" --force
 
-          gh pr create \
-            --repo ${{ env.repo }} \
-            --base main \
-            --head "$BRANCH" \
-            --title "[BOT] API ${{ needs.download-new-version.outputs.api_version }}" \
-            --body "Автоматическое обновление до версии Telegram Bot API ${{ needs.download-new-version.outputs.api_version }} (release ${{ needs.download-new-version.outputs.release_tag }})" \
-            2>/dev/null || echo "PR уже существует для этой ветки"
+  #         gh pr create \
+  #           --repo ${{ env.repo }} \
+  #           --base main \
+  #           --head "$BRANCH" \
+  #           --title "[BOT] API ${{ needs.download-new-version.outputs.api_version }}" \
+  #           --body "Автоматическое обновление до версии Telegram Bot API ${{ needs.download-new-version.outputs.api_version }} (release ${{ needs.download-new-version.outputs.release_tag }})" \
+  #           2>/dev/null || echo "PR уже существует для этой ветки"
 
   update-laravel-version-repo:
     runs-on: ubuntu-22.04
@@ -198,9 +198,7 @@ jobs:
           rm -rf ${{ env.laravel-directory }}/src
           mv build/Appto/TelegramBot ${{ env.laravel-directory }}/src
 
-      - name: Push branch and create PR
-        env:
-          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
+      - name: Push branch if changed
         run: |
           cd ${{ env.laravel-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
@@ -208,18 +206,9 @@ jobs:
           git add .
 
           if git diff --staged --quiet; then
-            echo "Нет изменений, PR не создаётся"
+            echo "Нет изменений, ветка не создаётся"
             exit 0
           fi
 
-          BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
           git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin "$BRANCH" --force
-
-          gh pr create \
-            --repo ${{ env.laravel-repo }} \
-            --base main \
-            --head "$BRANCH" \
-            --title "[BOT] API ${{ needs.download-new-version.outputs.api_version }}" \
-            --body "Автоматическое обновление до версии Telegram Bot API ${{ needs.download-new-version.outputs.api_version }} (release ${{ needs.download-new-version.outputs.release_tag }})" \
-            2>/dev/null || echo "PR уже существует для этой ветки"
+          git push origin "bot/api-${{ needs.download-new-version.outputs.api_version }}" --force
