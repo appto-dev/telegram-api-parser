@@ -185,30 +185,38 @@ jobs:
       - name: Run PHP-CS-Fixer
         uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
 
-      - name: Switch target repo to branch
-        run: |
-          cd ${{ env.laravel-directory }}
-          git fetch origin main
-          git checkout main
-          git pull origin main
-          git checkout -B "bot/api-${{ needs.download-new-version.outputs.api_version }}"
-
       - name: Copy files to repository
         run: |
           rm -rf ${{ env.laravel-directory }}/src
           mv build/Appto/TelegramBot ${{ env.laravel-directory }}/src
 
-      - name: Push branch if changed
+      - name: Push generate files to new branch
         run: |
-          cd ${{ env.laravel-directory }}
-          git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
-          git config user.name "${{ github.actor }}"
+          BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
+          git checkout -B "$BRANCH"
           git add .
-
-          if git diff --staged --quiet; then
-            echo "Нет изменений, ветка не создаётся"
-            exit 0
-          fi
-
           git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin "bot/api-${{ needs.download-new-version.outputs.api_version }}" --force
+          git push origin "$BRANCH" --force
+
+      # - name: Switch target repo to branch
+      #   run: |
+      #     cd ${{ env.laravel-directory }}
+      #     git fetch origin main
+      #     git checkout main
+      #     git pull origin main
+      #     git checkout -B "bot/api-${{ needs.download-new-version.outputs.api_version }}"
+
+      # - name: Push branch if changed
+      #   run: |
+      #     cd ${{ env.laravel-directory }}
+      #     git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
+      #     git config user.name "${{ github.actor }}"
+      #     git add .
+
+      #     if git diff --staged --quiet; then
+      #       echo "Нет изменений, ветка не создаётся"
+      #       exit 0
+      #     fi
+
+      #     git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
+      #     git push origin "bot/api-${{ needs.download-new-version.outputs.api_version }}" --force
