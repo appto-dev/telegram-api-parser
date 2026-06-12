@@ -14,7 +14,7 @@ on:
         default: false
         type: boolean
       manual_version:
-        description: 'Вручную указать версию API (например 10.1). Если пусто — берётся последняя/текущая'
+        description: 'Версия API (например 10.1). Если пусто — берётся последняя/текущая'
         required: false
         default: ''
         type: string
@@ -58,7 +58,7 @@ jobs:
       - name: Compute release tag
         id: tag
         run: |
-          echo "release_tag=${{ vars.RELEASE_MAJOR }}.${{ vars.RELEASE_MINOR }}.v${{ steps.download.outputs.api_version }}" >> $GITHUB_OUTPUT
+          echo "release_tag=${{ vars.RELEASE_MAJOR }}.${{ vars.RELEASE_MINOR }}.${{ steps.download.outputs.api_version }}" >> $GITHUB_OUTPUT
 
       - name: Has new version
         id: requires_update
@@ -124,9 +124,11 @@ jobs:
           git config user.name "${{ github.actor }}"
           git add .
           git diff --staged --quiet || git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin main
+          git push origin HEAD:main
 
       - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
         run: |
           cd ${{ env.repo-directory }}
           TAG="${{ needs.download-new-version.outputs.release_tag }}"
@@ -134,6 +136,11 @@ jobs:
           git push origin ":refs/tags/$TAG" 2>/dev/null || true
           git tag "$TAG" -m "Version $TAG (Telegram API ${{ needs.download-new-version.outputs.api_version }})"
           git push origin "$TAG"
+          gh release create "$TAG" \
+            --repo ${{ env.repo }} \
+            --title "$TAG" \
+            --notes "Telegram Bot API version ${{ needs.download-new-version.outputs.api_version }}" \
+            --target main
 
   update-laravel-version-repo:
     runs-on: ubuntu-22.04
@@ -176,18 +183,25 @@ jobs:
 
       - name: Push commit
         run: |
-          cd ${{ env.laravel-directory }}
+          cd ${{ env.repo-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config user.name "${{ github.actor }}"
           git add .
           git diff --staged --quiet || git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin main
+          git push origin HEAD:main
 
       - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
         run: |
-          cd ${{ env.laravel-directory }}
+          cd ${{ env.repo-directory }}
           TAG="${{ needs.download-new-version.outputs.release_tag }}"
           git tag -d "$TAG" 2>/dev/null || true
           git push origin ":refs/tags/$TAG" 2>/dev/null || true
           git tag "$TAG" -m "Version $TAG (Telegram API ${{ needs.download-new-version.outputs.api_version }})"
           git push origin "$TAG"
+          gh release create "$TAG" \
+            --repo ${{ env.repo }} \
+            --title "$TAG" \
+            --notes "Telegram Bot API version ${{ needs.download-new-version.outputs.api_version }}" \
+            --target main
