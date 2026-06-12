@@ -107,7 +107,7 @@ jobs:
       - name: Generate files
         run: |
           rm -rf build
-          php console telegram:generate php-new --useSpatie
+          php console telegram:generate php-new --useSpatie --v=${{ needs.download-new-version.outputs.api_version }}
 
       - name: Run PHP-CS-Fixer
         uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
