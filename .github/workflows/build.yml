@@ -11,8 +11,13 @@ on:
       force_release:
         description: 'Force release even if no changes detected'
         required: false
-        default: 'false'
+        default: false
         type: boolean
+      manual_version:
+        description: 'Вручную указать версию API (например 10.1). Если пусто — берётся последняя/текущая'
+        required: false
+        default: ''
+        type: string
 env:
   repo: 'appto-dev/telegram-bot-cast'
   repo-directory: 'telegram-bot-cast'
@@ -25,6 +30,7 @@ jobs:
     outputs:
       api_version: ${{ steps.download.outputs.api_version }}
       release_tag: ${{ steps.tag.outputs.release_tag }}
+      has_new_version: ${{ steps.requires_update.outputs.hasUpdate }}
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -36,7 +42,6 @@ jobs:
 
       - name: Install deps
         run: |
-          git pull
           rm -rf ${{ env.repo-directory }}
           rm -rf ${{ env.laravel-directory }}
           composer install --no-dev
@@ -44,7 +49,11 @@ jobs:
       - name: Download version Telegram API
         id: download
         run: |
-          echo "api_version=$(php console telegram:parse)" >> $GITHUB_OUTPUT
+          if [[ -n "${{ inputs.manual_version }}" ]]; then
+            echo "api_version=${{ inputs.manual_version }}" >> $GITHUB_OUTPUT
+          else
+            echo "api_version=$(php console telegram:parse)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Compute release tag
         id: tag
@@ -54,7 +63,7 @@ jobs:
       - name: Has new version
         id: requires_update
         run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
+          if [[ -n "$(git status --porcelain)" || -n "${{ inputs.manual_version }}" || "${{ inputs.force_release }}" == "true" ]]; then
             echo "hasUpdate=true" >> $GITHUB_OUTPUT
           else
             echo "hasUpdate=false" >> $GITHUB_OUTPUT
@@ -66,24 +75,26 @@ jobs:
           git add .
           git config --global user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config --global user.name "${{ github.actor }}"
-          git commit -m "[BOT] API ${{ steps.download.outputs.api_version }} | release ${{ steps.tag.outputs.release_tag }}"
+          git diff --staged --quiet || git commit -m "[BOT] API ${{ steps.download.outputs.api_version }} | release ${{ steps.tag.outputs.release_tag }}"
           git push
 
   update-repo:
     runs-on: ubuntu-22.04
     needs: download-new-version
+    if: needs.download-new-version.outputs.has_new_version == 'true' || inputs.force_release == 'true'
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      - name: Checkout api-parser
+      - name: Checkout api-parser (latest main)
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Install deps
         run: |
-          git pull
           composer install --no-dev
 
       - name: Checkout target repo
@@ -106,18 +117,7 @@ jobs:
           rm -rf ${{ env.repo-directory }}/src
           mv build/Appto/TelegramBot ${{ env.repo-directory }}/src
 
-      - name: Check update
-        id: check_update
-        run: |
-          cd ${{ env.repo-directory }}
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "hasUpdate=true" >> $GITHUB_OUTPUT
-          else
-            echo "hasUpdate=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Push commit
-        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.repo-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
@@ -127,7 +127,6 @@ jobs:
           git push origin main
 
       - name: Create Release
-        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.repo-directory }}
           TAG="${{ needs.download-new-version.outputs.release_tag }}"
@@ -139,18 +138,20 @@ jobs:
   update-laravel-version-repo:
     runs-on: ubuntu-22.04
     needs: download-new-version
+    if: needs.download-new-version.outputs.has_new_version == 'true' || inputs.force_release == 'true'
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      - name: Checkout api-parser
+      - name: Checkout api-parser (latest main)
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Install deps
         run: |
-          git pull
           composer install --no-dev
 
       - name: Checkout target repo
@@ -173,18 +174,7 @@ jobs:
           rm -rf ${{ env.laravel-directory }}/src
           mv build/Appto/TelegramBot ${{ env.laravel-directory }}/src
 
-      - name: Check update
-        id: check_update
-        run: |
-          cd ${{ env.laravel-directory }}
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "hasUpdate=true" >> $GITHUB_OUTPUT
-          else
-            echo "hasUpdate=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Push commit
-        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.laravel-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
@@ -194,7 +184,6 @@ jobs:
           git push origin main
 
       - name: Create Release
-        if: steps.check_update.outputs.hasUpdate == 'true' || inputs.force_release == 'true'
         run: |
           cd ${{ env.laravel-directory }}
           TAG="${{ needs.download-new-version.outputs.release_tag }}"
