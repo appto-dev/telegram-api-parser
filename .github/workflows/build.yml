@@ -9,12 +9,12 @@ on:
   workflow_dispatch:
     inputs:
       force_release:
-        description: 'Force release even if no changes detected'
+        description: 'Force update even if no changes detected'
         required: false
-        default: false
+        default: 'false'
         type: boolean
       manual_version:
-        description: 'Версия API (например 10.1). Если пусто — берётся последняя/текущая'
+        description: 'Вручную указать версию API (например 10.1). Если пусто — берётся последняя/текущая'
         required: false
         default: ''
         type: string
@@ -112,42 +112,44 @@ jobs:
       - name: Run PHP-CS-Fixer
         uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
 
-      - name: Switch target repo to main
+      - name: Switch target repo to branch
         run: |
           cd ${{ env.repo-directory }}
           git fetch origin main
           git checkout main
           git pull origin main
+          git checkout -B "bot/api-${{ needs.download-new-version.outputs.api_version }}"
 
       - name: Copy files to repository
         run: |
           rm -rf ${{ env.repo-directory }}/src
           mv build/Appto/TelegramBot ${{ env.repo-directory }}/src
 
-      - name: Push commit to main
+      - name: Push branch and create PR
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
         run: |
           cd ${{ env.repo-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config user.name "${{ github.actor }}"
           git add .
-          git diff --staged --quiet || git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin main
 
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
-        run: |
-          cd ${{ env.repo-directory }}
-          TAG="${{ needs.download-new-version.outputs.release_tag }}"
-          git tag -d "$TAG" 2>/dev/null || true
-          git push origin ":refs/tags/$TAG" 2>/dev/null || true
-          git tag "$TAG" -m "Version $TAG (Telegram API ${{ needs.download-new-version.outputs.api_version }})"
-          git push origin "$TAG"
-          gh release create "$TAG" \
+          if git diff --staged --quiet; then
+            echo "Нет изменений, PR не создаётся"
+            exit 0
+          fi
+
+          BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
+          git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
+          git push origin "$BRANCH" --force
+
+          gh pr create \
             --repo ${{ env.repo }} \
-            --title "$TAG" \
-            --notes "Telegram Bot API version ${{ needs.download-new-version.outputs.api_version }}" \
-            --target main
+            --base main \
+            --head "$BRANCH" \
+            --title "[BOT] API ${{ needs.download-new-version.outputs.api_version }}" \
+            --body "Автоматическое обновление до версии Telegram Bot API ${{ needs.download-new-version.outputs.api_version }} (release ${{ needs.download-new-version.outputs.release_tag }})" \
+            2>/dev/null || echo "PR уже существует для этой ветки"
 
   update-laravel-version-repo:
     runs-on: ubuntu-22.04
@@ -183,39 +185,41 @@ jobs:
       - name: Run PHP-CS-Fixer
         uses: erkenes/php-cs-fixer-action@php8.2-1.0.0
 
-      - name: Switch target repo to main
+      - name: Switch target repo to branch
         run: |
           cd ${{ env.laravel-directory }}
           git fetch origin main
           git checkout main
           git pull origin main
+          git checkout -B "bot/api-${{ needs.download-new-version.outputs.api_version }}"
 
       - name: Copy files to repository
         run: |
           rm -rf ${{ env.laravel-directory }}/src
           mv build/Appto/TelegramBot ${{ env.laravel-directory }}/src
 
-      - name: Push commit to main
+      - name: Push branch and create PR
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
         run: |
           cd ${{ env.laravel-directory }}
           git config user.email "${{ secrets.REPOSITORY_EMAIL }}"
           git config user.name "${{ github.actor }}"
           git add .
-          git diff --staged --quiet || git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
-          git push origin main
 
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ secrets.GH_ACTION_TELEGRAM_REPOSITORIES }}
-        run: |
-          cd ${{ env.laravel-directory }}
-          TAG="${{ needs.download-new-version.outputs.release_tag }}"
-          git tag -d "$TAG" 2>/dev/null || true
-          git push origin ":refs/tags/$TAG" 2>/dev/null || true
-          git tag "$TAG" -m "Version $TAG (Telegram API ${{ needs.download-new-version.outputs.api_version }})"
-          git push origin "$TAG"
-          gh release create "$TAG" \
+          if git diff --staged --quiet; then
+            echo "Нет изменений, PR не создаётся"
+            exit 0
+          fi
+
+          BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
+          git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
+          git push origin "$BRANCH" --force
+
+          gh pr create \
             --repo ${{ env.laravel-repo }} \
-            --title "$TAG" \
-            --notes "Telegram Bot API version ${{ needs.download-new-version.outputs.api_version }}" \
-            --target main
+            --base main \
+            --head "$BRANCH" \
+            --title "[BOT] API ${{ needs.download-new-version.outputs.api_version }}" \
+            --body "Автоматическое обновление до версии Telegram Bot API ${{ needs.download-new-version.outputs.api_version }} (release ${{ needs.download-new-version.outputs.release_tag }})" \
+            2>/dev/null || echo "PR уже существует для этой ветки"
