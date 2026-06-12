@@ -193,6 +193,8 @@ jobs:
       - name: Push generate files to new branch
         run: |
           BRANCH="bot/api-${{ needs.download-new-version.outputs.api_version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
           git add .
           git commit -m "[BOT] API ${{ needs.download-new-version.outputs.api_version }} | release ${{ needs.download-new-version.outputs.release_tag }}"
