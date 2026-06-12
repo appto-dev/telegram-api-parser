@@ -116,6 +116,9 @@ jobs:
         run: |
           rm -rf ${{ env.laravel-directory }}/src
           mv build/Appto/TelegramBot ${{ env.laravel-directory }}/src
+          cd ${{ env.laravel-directory }}
+          git status
+          git diff --stat
 
       - name: Push generate files to new branch
         run: |
