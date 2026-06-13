@@ -7752,7 +7752,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be animation",
+                            "description": "Type of the media, must be animation",
                             "required": true,
                             "default": "animation"
                         },
@@ -7827,7 +7827,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be audio",
+                            "description": "Type of the media, must be audio",
                             "required": true,
                             "default": "audio"
                         },
@@ -7890,7 +7890,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be document",
+                            "description": "Type of the media, must be document",
                             "required": true,
                             "default": "document"
                         },
@@ -7941,7 +7941,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be link",
+                            "description": "Type of the media, must be link",
                             "required": true,
                             "default": "link"
                         },
@@ -7960,7 +7960,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be live_photo",
+                            "description": "Type of the media, must be live_photo",
                             "required": true,
                             "default": "live_photo"
                         },
@@ -8017,7 +8017,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be location",
+                            "description": "Type of the media, must be location",
                             "required": true,
                             "default": "location"
                         },
@@ -8048,7 +8048,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be photo",
+                            "description": "Type of the media, must be photo",
                             "required": true,
                             "default": "photo"
                         },
@@ -8099,7 +8099,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be sticker",
+                            "description": "Type of the media, must be sticker",
                             "required": true,
                             "default": "sticker"
                         },
@@ -8124,7 +8124,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be venue",
+                            "description": "Type of the media, must be venue",
                             "required": true,
                             "default": "venue"
                         },
@@ -8185,7 +8185,7 @@
                         {
                             "name": "type",
                             "type": "String",
-                            "description": "Type of the result, must be video",
+                            "description": "Type of the media, must be video",
                             "required": true,
                             "default": "video"
                         },
@@ -10961,7 +10961,7 @@
                         {
                             "name": "draft_id",
                             "type": "Integer",
-                            "description": "Unique identifier of the message draft; must be non-zero. Changes of drafts with the same identifier are animated.",
+                            "description": "Unique identifier of the message draft; must be non-zero. Changes to drafts with the same identifier are animated.",
                             "required": true
                         },
                         {
