@@ -58,6 +58,10 @@ class DocumentationParser
             foreach ($sections as $section) {
                 $table = $this->getParametersFromTable($section);
 
+//                if ($table && $section->first('h4')->text() == 'ReactionTypeEmoji') {
+//                    dd($this->makeObjectParameters($table, true));
+//                }
+
                 if ($table) {
                     $data = [
                         'name' => $section->first('h4')->text(),
@@ -67,21 +71,15 @@ class DocumentationParser
                             : $this->makeMethodParameters($table),
                     ];
                 } else {
+                    $name = $section->first('h4')->text();
+                    if (strpos($name, ' ')) {
+                        continue;
+                    }
+
                     $data = [
-                        'name' => $section->first('h4')->text(),
+                        'name' => $name,
                         'description' => $this->cleanFormatDescription($this->findGroupDescription($section)),
                     ];
-
-                    if ($data['name'] == 'InputFile') {
-                        $data['parameters'] = [
-                            [
-                                'name' => 'attach',
-                                'type' => 'String',
-                                'description' => "The attached file.\nPlease note that this parameter does not exist in the documentation, it has been added to make it easier to work with files.",
-                                'required' => true,
-                            ]
-                        ];
-                    }
                 }
 
                 /* Is method? */
@@ -252,7 +250,7 @@ class DocumentationParser
             $parameter = [
                 'name' => $row[0],
                 'type' => $this->defineType($row[1]),
-                'description' => $this->cleanFormatDescription(str_replace($optionalKey, '', strip_tags($row[2]))),
+                'description' => $this->cleanFormatDescription(str_replace($optionalKey, '', strip_tags($row[2], ['img']))),
                 'required' => !str_contains(strip_tags($row[2]), $optionalKey),
             ];
 
@@ -313,6 +311,7 @@ class DocumentationParser
         }
 
         return trim($text);
+        return trim(strip_tags($text));
     }
 
     /**
@@ -444,6 +443,7 @@ class DocumentationParser
     private function getDocument(): Document {
         if ($this->document instanceof Document) return $this->document;
 
+        error_reporting(E_ALL & ~E_DEPRECATED);
         $this->document = new Document(self::BASE_URL, true);
         return $this->document;
     }
