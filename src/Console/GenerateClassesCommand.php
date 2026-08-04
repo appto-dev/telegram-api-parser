@@ -5,14 +5,11 @@ namespace TelegramApiParser\Console;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Dto;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\RuntimeException;
-use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use TelegramApiParser\CodeGenerator\NewPHP\Generator;
-use TelegramApiParser\CodeGenerator\PHP\PHPGenerator;
+use TelegramApiParser\CodeGenerator\Framework\Generator;
 
 class GenerateClassesCommand extends Command
 {
@@ -21,8 +18,7 @@ class GenerateClassesCommand extends Command
     protected static $defaultDescription = 'Generates objects from the documentation.';
 
     private const GENERATORS = [
-        'php' => PHPGenerator::class,
-        'php-new' => Generator::class,
+        'php' => Generator::class,
     ];
 
     protected function execute(InputInterface $input, OutputInterface $output): int {

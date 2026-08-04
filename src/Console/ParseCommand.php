@@ -23,6 +23,7 @@ class ParseCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int {
         $documentation_parser = new DocumentationParser();
 
+
         $version = $documentation_parser->version();
         $date = $documentation_parser->latestDate();
 
