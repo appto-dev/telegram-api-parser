@@ -58,10 +58,10 @@ class DocumentationParser
             foreach ($sections as $section) {
                 $table = $this->getParametersFromTable($section);
 
-                if ($table) {
-                    $name = $section->first('h4')->text();
-                    if (str_contains($name, ' ')) continue;
+                $name = $section->first('h4')->text();
+                if (str_contains($name, ' ')) continue;
 
+                if ($table) {
                     $data = [
                         'name' => $name,
                         'description' => $this->cleanFormatDescription($this->findGroupDescription($section)),
@@ -70,11 +70,6 @@ class DocumentationParser
                             : $this->makeMethodParameters($table),
                     ];
                 } else {
-                    $name = $section->first('h4')->text();
-                    if (strpos($name, ' ')) {
-                        continue;
-                    }
-
                     $data = [
                         'name' => $name,
                         'description' => $this->cleanFormatDescription($this->findGroupDescription($section)),
