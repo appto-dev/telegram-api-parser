@@ -58,13 +58,12 @@ class DocumentationParser
             foreach ($sections as $section) {
                 $table = $this->getParametersFromTable($section);
 
-//                if ($table && $section->first('h4')->text() == 'ReactionTypeEmoji') {
-//                    dd($this->makeObjectParameters($table, true));
-//                }
-
                 if ($table) {
+                    $name = $section->first('h4')->text();
+                    if (str_contains($name, ' ')) continue;
+
                     $data = [
-                        'name' => $section->first('h4')->text(),
+                        'name' => $name,
                         'description' => $this->cleanFormatDescription($this->findGroupDescription($section)),
                         'parameters' => count($table[0]) === 3
                             ? $this->makeObjectParameters($table)
