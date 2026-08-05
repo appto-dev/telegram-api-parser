@@ -22,19 +22,18 @@ use TelegramApiParser\CodeGenerator\GeneratorInterface;
 
 class Generator implements GeneratorInterface
 {
-    private string $build = __DIR__ . '/../../../build';
+    private string $build = __DIR__.'/../../../build';
     private const TELEGRAM_METHODS_NAMESPACE = 'Appto\\TelegramBot\\Method';
     private const TELEGRAM_TYPES_NAMESPACE = 'Appto\\TelegramBot\\Type';
     private const SUPPORT_NAMESPACE = 'Appto\\TelegramBot\\Support';
     private const CASTS_NAMESPACE = 'Appto\\TelegramBot\\Support\\Casts';
-    private const CASTS_DIRECTORY = __DIR__ . DIRECTORY_SEPARATOR . 'Casts';
+    private const CASTS_DIRECTORY = __DIR__.DIRECTORY_SEPARATOR.'Casts';
 
     private readonly TelegramTypeResolver $typeResolver;
     private readonly PhpTypeChecker $typeChecker;
     private readonly MyPrinter $printer;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->typeResolver = new TelegramTypeResolver(self::TELEGRAM_TYPES_NAMESPACE);
         $this->typeChecker = new PhpTypeChecker();
         $this->printer = new MyPrinter();
@@ -46,8 +45,7 @@ class Generator implements GeneratorInterface
         $this->makeDirectoryForNamespace(new PhpNamespace(self::CASTS_NAMESPACE));
     }
 
-    public function handle(string $file_source): void
-    {
+    public function handle(string $file_source): void {
         $content = json_decode(file_get_contents($file_source), true);
         $documentation = array_slice($content['documentation'], 4);
 
@@ -97,8 +95,7 @@ class Generator implements GeneratorInterface
      *
      * @return array{0: array<string, list<string>>, 1: list<string>}
      */
-    private function scanSections(array $documentation): array
-    {
+    private function scanSections(array $documentation): array {
         $implements = [];
         $castableProperties = [];
 
@@ -114,7 +111,7 @@ class Generator implements GeneratorInterface
                     continue;
                 }
 
-                $interfaceFqcn = self::TELEGRAM_TYPES_NAMESPACE . '\\' . $item['name'];
+                $interfaceFqcn = self::TELEGRAM_TYPES_NAMESPACE.'\\'.$item['name'];
 
                 foreach ($linkedTypes as $class) {
                     $implements[$class][] = $interfaceFqcn;
@@ -127,13 +124,11 @@ class Generator implements GeneratorInterface
         return [$implements, array_unique($castableProperties)];
     }
 
-    private function isInterfaceOnly(array $item): bool
-    {
+    private function isInterfaceOnly(array $item): bool {
         return !isset($item['parameters']) && !isset($item['return']);
     }
 
-    private function isMethodItem(array $item): bool
-    {
+    private function isMethodItem(array $item): bool {
         return isset($item['return']);
     }
 
@@ -141,8 +136,7 @@ class Generator implements GeneratorInterface
     // Namespace / interface / class skeleton
     // ------------------------------------------------------------------
 
-    private function namespaceForItem(array $item): PhpNamespace
-    {
+    private function namespaceForItem(array $item): PhpNamespace {
         return new PhpNamespace(
             $this->isMethodItem($item) ? self::TELEGRAM_METHODS_NAMESPACE : self::TELEGRAM_TYPES_NAMESPACE
         );
@@ -152,14 +146,12 @@ class Generator implements GeneratorInterface
      * Генерирует два "корневых" интерфейса с общим контрактом (toArray/from),
      * которые реализует каждый сгенерированный Data-класс - методов и типов отдельно.
      */
-    private function emitBaseInterfaces(): void
-    {
+    private function emitBaseInterfaces(): void {
         $this->emitBaseInterface(self::TELEGRAM_METHODS_NAMESPACE, 'TelegramMethod', 'методов');
         $this->emitBaseInterface(self::TELEGRAM_TYPES_NAMESPACE, 'TelegramType', 'типов');
     }
 
-    private function emitBaseInterface(string $namespaceName, string $interfaceName, string $description): void
-    {
+    private function emitBaseInterface(string $namespaceName, string $interfaceName, string $description): void {
         $namespace = new PhpNamespace($namespaceName);
 
         $interface = $namespace
@@ -174,14 +166,17 @@ class Generator implements GeneratorInterface
         $this->print($namespace);
     }
 
-    private function emitInterface(PhpNamespace $namespace, array $item): void
-    {
+    private function emitInterface(PhpNamespace $namespace, array $item): void {
         $namespace->addInterface(ucfirst($item['name']))->addComment($item['description']);
         $this->print($namespace);
     }
 
-    private function emitDataClassSkeleton(PhpNamespace $namespace, array $item, array $doc, array $implements): ClassType
-    {
+    private function emitDataClassSkeleton(
+        PhpNamespace $namespace,
+        array $item,
+        array $doc,
+        array $implements
+    ): ClassType {
         $class = $namespace
             ->addUse(Data::class)
             ->addClass(ucfirst($item['name']))
@@ -194,26 +189,24 @@ class Generator implements GeneratorInterface
         return $class;
     }
 
-    private function baseInterfaceFqcn(array $item): string
-    {
+    private function baseInterfaceFqcn(array $item): string {
         return $this->isMethodItem($item)
-            ? self::TELEGRAM_METHODS_NAMESPACE . '\\TelegramMethod'
-            : self::TELEGRAM_TYPES_NAMESPACE . '\\TelegramType';
+            ? self::TELEGRAM_METHODS_NAMESPACE.'\\TelegramMethod'
+            : self::TELEGRAM_TYPES_NAMESPACE.'\\TelegramType';
     }
 
     // ------------------------------------------------------------------
     // Метод клиента (docInterface): сигнатура + докблок
     // ------------------------------------------------------------------
 
-    private function emitMethodDoc(InterfaceType $docInterface, PhpNamespace $docNamespace, array $item): void
-    {
+    private function emitMethodDoc(InterfaceType $docInterface, PhpNamespace $docNamespace, array $item): void {
         $returnPhpType = $this->typeResolver->toPhpType($item['return']);
         $returnDocType = $this->typeResolver->toDocType($item['return']);
 
         $docMethod = $docInterface
             ->addMethod($item['name'])
             ->setReturnType($returnPhpType)
-            ->addComment($item['description'] . PHP_EOL);
+            ->addComment($item['description'].PHP_EOL);
 
         $this->addUseForReturnType($docNamespace, $returnPhpType, $returnDocType);
 
@@ -223,11 +216,14 @@ class Generator implements GeneratorInterface
             }
         }
 
-        $docMethod->addComment('')->addComment('@return ' . $returnDocType);
+        $docMethod->addComment('')->addComment('@return '.$returnDocType);
     }
 
-    private function addUseForReturnType(PhpNamespace $docNamespace, string $returnPhpType, string $returnDocType): void
-    {
+    private function addUseForReturnType(
+        PhpNamespace $docNamespace,
+        string $returnPhpType,
+        string $returnDocType
+    ): void {
         if (!$this->typeChecker->isNativeType($returnPhpType)) {
             foreach ($this->typeChecker->extractClassNames($returnPhpType) as $class) {
                 $docNamespace->addUse($class);
@@ -238,13 +234,12 @@ class Generator implements GeneratorInterface
 
         if ($returnPhpType === 'array') {
             foreach ($this->typeChecker->extractClassNames($returnDocType) as $class) {
-                $docNamespace->addUse(self::TELEGRAM_TYPES_NAMESPACE . '\\' . $class);
+                $docNamespace->addUse(self::TELEGRAM_TYPES_NAMESPACE.'\\'.$class);
             }
         }
     }
 
-    private function emitMethodParameter(Method $docMethod, PhpNamespace $docNamespace, array $parameter): void
-    {
+    private function emitMethodParameter(Method $docMethod, PhpNamespace $docNamespace, array $parameter): void {
         [$phpType, $docType] = $this->resolveParameterTypes($parameter);
 
         if (!$this->typeChecker->isNativeType($docType)) {
@@ -268,8 +263,12 @@ class Generator implements GeneratorInterface
     // Data-класс: __construct с промотированными свойствами
     // ------------------------------------------------------------------
 
-    private function emitConstructor(PhpNamespace $namespace, ClassType $class, array $item, array $castableProperties): void
-    {
+    private function emitConstructor(
+        PhpNamespace $namespace,
+        ClassType $class,
+        array $item,
+        array $castableProperties
+    ): void {
         $constructor = $class->addMethod('__construct');
 
         foreach ($item['parameters'] as $parameter) {
@@ -298,17 +297,15 @@ class Generator implements GeneratorInterface
     }
 
     /** @return array{0: string, 1: string} [phpType, docType] */
-    private function resolveParameterTypes(array $parameter): array
-    {
+    private function resolveParameterTypes(array $parameter): array {
         return [
             $this->typeResolver->toPhpType($parameter['type']),
             $this->typeResolver->toDocType($parameter['type']),
         ];
     }
 
-    private function sortByRequired(array $parameters): array
-    {
-        usort($parameters, fn ($a, $b) => $b['required'] <=> $a['required']);
+    private function sortByRequired(array $parameters): array {
+        usort($parameters, fn($a, $b) => $b['required'] <=> $a['required']);
 
         return $parameters;
     }
@@ -317,20 +314,19 @@ class Generator implements GeneratorInterface
     // Cast-классы
     // ------------------------------------------------------------------
 
-    private function makeOrMoveCastableClass(PhpNamespace $namespace, Parameter $props): void
-    {
+    private function makeOrMoveCastableClass(PhpNamespace $namespace, Parameter $props): void {
         $phpType = $props->getType();
 
-        $castClassName = basename(str_replace('\\', '/', $phpType)) . 'Cast';
-        $castableLiteral = new Literal($castClassName . '::class');
+        $castClassName = basename(str_replace('\\', '/', $phpType)).'Cast';
+        $castableLiteral = new Literal($castClassName.'::class');
         $props->addAttribute(WithCast::class, [$castableLiteral]);
 
         $namespace->addUse(WithCast::class);
-        $namespace->addUse(self::CASTS_NAMESPACE . '\\' . $castClassName);
+        $namespace->addUse(self::CASTS_NAMESPACE.'\\'.$castClassName);
 
-        $filename = self::CASTS_DIRECTORY . DIRECTORY_SEPARATOR . $castClassName . '.php';
+        $filename = self::CASTS_DIRECTORY.DIRECTORY_SEPARATOR.$castClassName.'.php';
         $directory = $this->getDirectoryForNamespace(new PhpNamespace(self::CASTS_NAMESPACE));
-        $to = $directory . DIRECTORY_SEPARATOR . basename($filename);
+        $to = $directory.DIRECTORY_SEPARATOR.basename($filename);
 
         if (file_exists($filename)) {
             copy($filename, $to);
@@ -360,15 +356,14 @@ class Generator implements GeneratorInterface
     // Печать файлов / directory helpers
     // ------------------------------------------------------------------
 
-    private function print(PhpNamespace $namespace): string
-    {
+    private function print(PhpNamespace $namespace): string {
         $this->makeDirectoryForNamespace($namespace);
 
         $class = array_first($namespace->getClasses());
         $directory = $this->getDirectoryForNamespace($namespace);
-        $filepath = $directory . DIRECTORY_SEPARATOR . $class->getName() . '.php';
+        $filepath = $directory.DIRECTORY_SEPARATOR.$class->getName().'.php';
 
-        $content = '<?php' . PHP_EOL . $this->printer->printNamespace($namespace);
+        $content = '<?php'.PHP_EOL.$this->printer->printNamespace($namespace);
         $file = PhpFile::fromCode($content);
         $file->setStrictTypes();
 
@@ -377,28 +372,26 @@ class Generator implements GeneratorInterface
         return $filepath;
     }
 
-    private function makeDirectoryForNamespace(PhpNamespace $namespace): void
-    {
+    private function makeDirectoryForNamespace(PhpNamespace $namespace): void {
         $directory = $this->getDirectoryForNamespace($namespace);
 
         $path = '';
         foreach (explode(DIRECTORY_SEPARATOR, $directory) as $dir) {
-            $path .= DIRECTORY_SEPARATOR . $dir;
+            $path .= DIRECTORY_SEPARATOR.$dir;
             if (!file_exists($path) || !is_dir($path)) {
                 mkdir($path);
             }
         }
     }
 
-    private function getDirectoryForNamespace(PhpNamespace $namespace): string
-    {
-        $directory = str_replace('\\', DIRECTORY_SEPARATOR, str_replace('Appto\\TelegramBot\\', '', $namespace->getName()));
+    private function getDirectoryForNamespace(PhpNamespace $namespace): string {
+        $directory = str_replace('\\', DIRECTORY_SEPARATOR,
+            str_replace('Appto\\TelegramBot\\', '', $namespace->getName()));
 
-        return $this->build . DIRECTORY_SEPARATOR . $directory;
+        return $this->build.DIRECTORY_SEPARATOR.$directory;
     }
 
-    private function addUse(PhpNamespace $namespace, string $docType, ?string $classname = null): void
-    {
+    private function addUse(PhpNamespace $namespace, string $docType, ?string $classname = null): void {
         $clearDocType = str_replace(['(', ')'], '', $docType);
 
         if ($this->typeChecker->isNativeType($clearDocType)) {
@@ -410,7 +403,7 @@ class Generator implements GeneratorInterface
                 continue;
             }
 
-            $namespace->addUse(self::TELEGRAM_TYPES_NAMESPACE . '\\' . $object);
+            $namespace->addUse(self::TELEGRAM_TYPES_NAMESPACE.'\\'.$object);
         }
     }
 }

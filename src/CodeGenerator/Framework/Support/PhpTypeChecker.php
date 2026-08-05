@@ -14,8 +14,7 @@ final class PhpTypeChecker
      * true - тип целиком состоит из нативных php-типов (в т.ч. union/nullable/массив).
      * false - хотя бы одна часть union-а является классом.
      */
-    public function isNativeType(string $type): bool
-    {
+    public function isNativeType(string $type): bool {
         $type = ltrim($type, '?');
 
         foreach (explode('|', $type) as $part) {
@@ -30,8 +29,7 @@ final class PhpTypeChecker
     }
 
     /** Все class-компоненты типа, если это не чисто нативный тип. */
-    public function extractClassNames(string $type): array
-    {
+    public function extractClassNames(string $type): array {
         $type = ltrim($type, '?');
         $classes = [];
 

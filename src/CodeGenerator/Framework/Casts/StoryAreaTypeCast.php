@@ -16,8 +16,7 @@ use Spatie\LaravelData\Support\DataProperty;
 
 class StoryAreaTypeCast implements Cast
 {
-    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed
-    {
+    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed {
         if (!is_array($value)) {
             return Uncastable::create();
         }

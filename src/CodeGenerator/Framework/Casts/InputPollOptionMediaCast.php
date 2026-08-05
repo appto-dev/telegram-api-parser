@@ -19,8 +19,7 @@ use Spatie\LaravelData\Support\DataProperty;
 
 class InputPollOptionMediaCast implements Cast
 {
-    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed
-    {
+    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed {
         if (!is_array($value)) {
             return Uncastable::create();
         }

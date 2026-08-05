@@ -15,8 +15,7 @@ use Spatie\LaravelData\Support\DataProperty;
 
 class MessageOriginCast implements Cast
 {
-	public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed
-	{
+    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed {
         if (!is_array($value)) {
             return Uncastable::create();
         }
@@ -28,5 +27,5 @@ class MessageOriginCast implements Cast
             'channel' => MessageOriginChannel::from($value),
             default => Uncastable::create()
         };
-	}
+    }
 }

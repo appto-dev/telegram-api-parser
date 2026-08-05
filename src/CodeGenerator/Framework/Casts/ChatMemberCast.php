@@ -17,8 +17,7 @@ use Spatie\LaravelData\Support\DataProperty;
 
 class ChatMemberCast implements Cast
 {
-	public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed
-	{
+    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed {
         if (!is_array($value)) {
             return Uncastable::create();
         }
@@ -32,5 +31,5 @@ class ChatMemberCast implements Cast
             'kicked' => ChatMemberBanned::from($value),
             default => Uncastable::create(),
         };
-	}
+    }
 }

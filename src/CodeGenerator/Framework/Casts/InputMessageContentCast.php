@@ -17,8 +17,7 @@ use Spatie\LaravelData\Support\DataProperty;
 
 class InputMessageContentCast implements Cast
 {
-	public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed
-	{
+    public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): mixed {
         if (!is_array($value)) {
             return Uncastable::create();
         }
@@ -32,5 +31,5 @@ class InputMessageContentCast implements Cast
             isset($value['title']) && isset($value['description']) && isset($value['payload']) && isset($value['currency']) && isset($value['prices']) => InputInvoiceMessageContent::from($value),
             default => Uncastable::create(),
         };
-	}
+    }
 }
