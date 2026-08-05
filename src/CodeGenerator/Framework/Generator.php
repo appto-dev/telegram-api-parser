@@ -254,9 +254,13 @@ class Generator implements GeneratorInterface
             $parameter['description']
         ));
 
-        $docMethod->addParameter($parameter['name'])
-            ->setType($phpType)
-            ->setNullable(!$parameter['required']);
+        $param = $docMethod->addParameter($parameter['name'])
+            ->setType($phpType);
+
+        if (!$parameter['required']) {
+            $param->setDefaultValue(null)
+                ->setNullable();
+        }
     }
 
     // ------------------------------------------------------------------
