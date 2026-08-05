@@ -4,7 +4,7 @@ namespace TelegramApiParser\CodeGenerator\Framework\Support;
 
 final class PhpTypeChecker
 {
-    private const NATIVE_TYPES = [
+    private const array NATIVE_TYPES = [
         'int', 'string', 'bool', 'float', 'array', 'object', 'mixed',
         'void', 'null', 'never', 'callable', 'iterable',
         'self', 'static', 'parent', 'true', 'false',

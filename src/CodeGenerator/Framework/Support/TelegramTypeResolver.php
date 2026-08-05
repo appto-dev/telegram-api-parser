@@ -4,7 +4,7 @@ namespace TelegramApiParser\CodeGenerator\Framework\Support;
 
 final class TelegramTypeResolver
 {
-    private const SCALAR_MAP = [
+    private const array SCALAR_MAP = [
         'Integer' => 'int',
         'String' => 'string',
         'Boolean' => 'bool',

@@ -95,7 +95,7 @@ jobs:
 
       - name: Install deps
         run: |
-          composer update --no-dev
+          composer install --no-dev
 
       - name: Checkout target repo
         uses: actions/checkout@v4

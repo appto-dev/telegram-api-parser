@@ -5,7 +5,9 @@ namespace TelegramApiParser\CodeGenerator\Framework\Support;
 class Str
 {
     public static function toCamelCase(string $string, string $separator = ' '): string {
-        return implode('', array_map('ucfirst', explode($separator, $string)));
+        return explode($separator, $string)
+                |> (fn($x) => array_map('ucfirst', $x))
+                |> (fn($x) => implode('', $x));
     }
 
     public static function linkedTypesExtractor(string $description): array {
