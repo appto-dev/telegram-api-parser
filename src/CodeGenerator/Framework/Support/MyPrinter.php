@@ -14,7 +14,7 @@ class MyPrinter extends Printer
     public string $indentation = '    ';
     public int $linesBetweenMethods = 1;
     public int $linesBetweenUseTypes = 1;
-    public int $wrapLength = 80;
+    public int $wrapLength = 100;
     private const string PLACEHOLDER = "\x00";
 
     protected function isBraceOnNextLine(bool $multiLine, bool $hasReturnType): bool {

@@ -10,8 +10,9 @@ class Str
             |> (fn($x) => implode('', $x));
     }
 
-    public static function linkedTypesExtractor(string $description) {
-        preg_match_all('/\s*-\s*<a\s+href="[^"]*">([A-Z][A-Za-z0-9]*)<\/a>/', $description, $matches);
+    public static function linkedTypesExtractor(string $description): array
+    {
+        preg_match_all('/-\s*<a\s+href="[^"]*">([A-Z][A-Za-z0-9]*)<\/a>/', $description, $matches);
 
         return array_values(array_unique($matches[1]));
     }
