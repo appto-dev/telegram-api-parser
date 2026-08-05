@@ -44,7 +44,7 @@ jobs:
         run: |
           rm -rf ${{ env.repo-directory }}
           rm -rf ${{ env.laravel-directory }}
-          composer install --no-dev
+          composer update --no-dev
 
       - name: Download version Telegram API
         id: download
