@@ -23,11 +23,11 @@ use TelegramApiParser\CodeGenerator\GeneratorInterface;
 class Generator implements GeneratorInterface
 {
     private string $build = __DIR__ . '/../../../build';
-    private const string TELEGRAM_METHODS_NAMESPACE = 'Appto\\TelegramBot\\Method';
-    private const string TELEGRAM_TYPES_NAMESPACE = 'Appto\\TelegramBot\\Type';
-    private const string SUPPORT_NAMESPACE = 'Appto\\TelegramBot\\Support';
-    private const string CASTS_NAMESPACE = 'Appto\\TelegramBot\\Support\\Casts';
-    private const string CASTS_DIRECTORY = __DIR__ . DIRECTORY_SEPARATOR . 'Casts';
+    private const TELEGRAM_METHODS_NAMESPACE = 'Appto\\TelegramBot\\Method';
+    private const TELEGRAM_TYPES_NAMESPACE = 'Appto\\TelegramBot\\Type';
+    private const SUPPORT_NAMESPACE = 'Appto\\TelegramBot\\Support';
+    private const CASTS_NAMESPACE = 'Appto\\TelegramBot\\Support\\Casts';
+    private const CASTS_DIRECTORY = __DIR__ . DIRECTORY_SEPARATOR . 'Casts';
 
     private readonly TelegramTypeResolver $typeResolver;
     private readonly PhpTypeChecker $typeChecker;
