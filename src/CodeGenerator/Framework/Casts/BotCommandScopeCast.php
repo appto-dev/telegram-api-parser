@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\BotCommandScopeAllChatAdministrators;
-use Appto\TelegramBot\TelegramType\BotCommandScopeAllGroupChats;
-use Appto\TelegramBot\TelegramType\BotCommandScopeAllPrivateChats;
-use Appto\TelegramBot\TelegramType\BotCommandScopeChat;
-use Appto\TelegramBot\TelegramType\BotCommandScopeChatAdministrators;
-use Appto\TelegramBot\TelegramType\BotCommandScopeChatMember;
-use Appto\TelegramBot\TelegramType\BotCommandScopeDefault;
+use Appto\TelegramBot\Type\BotCommandScopeAllChatAdministrators;
+use Appto\TelegramBot\Type\BotCommandScopeAllGroupChats;
+use Appto\TelegramBot\Type\BotCommandScopeAllPrivateChats;
+use Appto\TelegramBot\Type\BotCommandScopeChat;
+use Appto\TelegramBot\Type\BotCommandScopeChatAdministrators;
+use Appto\TelegramBot\Type\BotCommandScopeChatMember;
+use Appto\TelegramBot\Type\BotCommandScopeDefault;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

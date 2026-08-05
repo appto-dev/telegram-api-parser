@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\TransactionPartnerAffiliateProgram;
-use Appto\TelegramBot\TelegramType\TransactionPartnerChat;
-use Appto\TelegramBot\TelegramType\TransactionPartnerFragment;
-use Appto\TelegramBot\TelegramType\TransactionPartnerOther;
-use Appto\TelegramBot\TelegramType\TransactionPartnerTelegramAds;
-use Appto\TelegramBot\TelegramType\TransactionPartnerTelegramApi;
-use Appto\TelegramBot\TelegramType\TransactionPartnerUser;
+use Appto\TelegramBot\Type\TransactionPartnerAffiliateProgram;
+use Appto\TelegramBot\Type\TransactionPartnerChat;
+use Appto\TelegramBot\Type\TransactionPartnerFragment;
+use Appto\TelegramBot\Type\TransactionPartnerOther;
+use Appto\TelegramBot\Type\TransactionPartnerTelegramAds;
+use Appto\TelegramBot\Type\TransactionPartnerTelegramApi;
+use Appto\TelegramBot\Type\TransactionPartnerUser;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

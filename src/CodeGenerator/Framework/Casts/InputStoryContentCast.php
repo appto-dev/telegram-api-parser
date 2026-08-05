@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\InputStoryContentPhoto;
-use Appto\TelegramBot\TelegramType\InputStoryContentVideo;
+use Appto\TelegramBot\Type\InputStoryContentPhoto;
+use Appto\TelegramBot\Type\InputStoryContentVideo;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

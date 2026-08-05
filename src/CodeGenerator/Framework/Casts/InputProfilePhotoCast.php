@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\InputProfilePhotoAnimated;
-use Appto\TelegramBot\TelegramType\InputProfilePhotoStatic;
+use Appto\TelegramBot\Type\InputProfilePhotoAnimated;
+use Appto\TelegramBot\Type\InputProfilePhotoStatic;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

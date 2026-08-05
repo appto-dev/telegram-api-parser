@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\StoryAreaTypeLink;
-use Appto\TelegramBot\TelegramType\StoryAreaTypeLocation;
-use Appto\TelegramBot\TelegramType\StoryAreaTypeSuggestedReaction;
-use Appto\TelegramBot\TelegramType\StoryAreaTypeUniqueGift;
-use Appto\TelegramBot\TelegramType\StoryAreaTypeWeather;
+use Appto\TelegramBot\Type\StoryAreaTypeLink;
+use Appto\TelegramBot\Type\StoryAreaTypeLocation;
+use Appto\TelegramBot\Type\StoryAreaTypeSuggestedReaction;
+use Appto\TelegramBot\Type\StoryAreaTypeUniqueGift;
+use Appto\TelegramBot\Type\StoryAreaTypeWeather;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

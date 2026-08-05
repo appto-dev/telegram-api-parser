@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\RevenueWithdrawalStateFailed;
-use Appto\TelegramBot\TelegramType\RevenueWithdrawalStatePending;
-use Appto\TelegramBot\TelegramType\RevenueWithdrawalStateSucceeded;
+use Appto\TelegramBot\Type\RevenueWithdrawalStateFailed;
+use Appto\TelegramBot\Type\RevenueWithdrawalStatePending;
+use Appto\TelegramBot\Type\RevenueWithdrawalStateSucceeded;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

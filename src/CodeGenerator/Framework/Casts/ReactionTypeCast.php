@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\ReactionTypeCustomEmoji;
-use Appto\TelegramBot\TelegramType\ReactionTypeEmoji;
-use Appto\TelegramBot\TelegramType\ReactionTypePaid;
+use Appto\TelegramBot\Type\ReactionTypeCustomEmoji;
+use Appto\TelegramBot\Type\ReactionTypeEmoji;
+use Appto\TelegramBot\Type\ReactionTypePaid;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

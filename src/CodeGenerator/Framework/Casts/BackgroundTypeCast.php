@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\BackgroundTypeChatTheme;
-use Appto\TelegramBot\TelegramType\BackgroundTypeFill;
-use Appto\TelegramBot\TelegramType\BackgroundTypePattern;
-use Appto\TelegramBot\TelegramType\BackgroundTypeWallpaper;
+use Appto\TelegramBot\Type\BackgroundTypeChatTheme;
+use Appto\TelegramBot\Type\BackgroundTypeFill;
+use Appto\TelegramBot\Type\BackgroundTypePattern;
+use Appto\TelegramBot\Type\BackgroundTypeWallpaper;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

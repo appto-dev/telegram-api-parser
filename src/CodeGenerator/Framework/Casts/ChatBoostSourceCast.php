@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\ChatBoostSourceGiftCode;
-use Appto\TelegramBot\TelegramType\ChatBoostSourceGiveaway;
-use Appto\TelegramBot\TelegramType\ChatBoostSourcePremium;
+use Appto\TelegramBot\Type\ChatBoostSourceGiftCode;
+use Appto\TelegramBot\Type\ChatBoostSourceGiveaway;
+use Appto\TelegramBot\Type\ChatBoostSourcePremium;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\MenuButtonCommands;
-use Appto\TelegramBot\TelegramType\MenuButtonDefault;
-use Appto\TelegramBot\TelegramType\MenuButtonWebApp;
+use Appto\TelegramBot\Type\MenuButtonCommands;
+use Appto\TelegramBot\Type\MenuButtonDefault;
+use Appto\TelegramBot\Type\MenuButtonWebApp;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

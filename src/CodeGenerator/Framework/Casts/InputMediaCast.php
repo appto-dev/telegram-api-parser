@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\InputMediaAnimation;
-use Appto\TelegramBot\TelegramType\InputMediaAudio;
-use Appto\TelegramBot\TelegramType\InputMediaDocument;
-use Appto\TelegramBot\TelegramType\InputMediaLivePhoto;
-use Appto\TelegramBot\TelegramType\InputMediaPhoto;
-use Appto\TelegramBot\TelegramType\InputMediaVideo;
+use Appto\TelegramBot\Type\InputMediaAnimation;
+use Appto\TelegramBot\Type\InputMediaAudio;
+use Appto\TelegramBot\Type\InputMediaDocument;
+use Appto\TelegramBot\Type\InputMediaLivePhoto;
+use Appto\TelegramBot\Type\InputMediaPhoto;
+use Appto\TelegramBot\Type\InputMediaVideo;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

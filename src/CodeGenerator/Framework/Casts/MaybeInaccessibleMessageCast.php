@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Appto\TelegramBot\Support\Casts;
 
-use Appto\TelegramBot\TelegramType\InaccessibleMessage;
-use Appto\TelegramBot\TelegramType\Message;
+use Appto\TelegramBot\Type\InaccessibleMessage;
+use Appto\TelegramBot\Type\Message;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
 use Spatie\LaravelData\Support\Creation\CreationContext;

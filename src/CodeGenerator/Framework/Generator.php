@@ -18,7 +18,7 @@ use TelegramApiParser\CodeGenerator\GeneratorInterface;
 
 class Generator implements GeneratorInterface
 {
-    private string $build = __DIR__ .'/../../../building';
+    private string $build = __DIR__ .'/../../../build';
     private const string TELEGRAM_METHODS_NAMESPACE = 'Appto\\TelegramBot\\Method';
     private const string TELEGRAM_TYPES_NAMESPACE = 'Appto\\TelegramBot\\Type';
     private const string SUPPORT_NAMESPACE = 'Appto\\TelegramBot\\Support';
@@ -136,6 +136,9 @@ class Generator implements GeneratorInterface
 
                                 $this->print($castNamespace);
                                 copy($to, $filename);
+
+                                // тут бы какое-то сообщение отправить, чтобы быть в курсе нового каста.
+
                             }
                         }
                     }
