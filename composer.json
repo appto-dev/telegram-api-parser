@@ -21,7 +21,7 @@
         "friendsofphp/php-cs-fixer": "^3.93"
     },
     "require": {
-        "php": "^8.5",
+        "php": "^8.2",
         "ext-dom": "*",
         "imangazaliev/didom": "^2.0",
         "nette/php-generator": "^4.0",

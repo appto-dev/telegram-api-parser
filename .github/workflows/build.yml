@@ -86,7 +86,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: '8.2'
 
       - name: Checkout api-parser (latest main)
         uses: actions/checkout@v4
