@@ -95,7 +95,7 @@ jobs:
 
       - name: Install deps
         run: |
-          composer install --no-dev
+          composer update --no-dev
 
       - name: Checkout target repo
         uses: actions/checkout@v4
@@ -115,7 +115,7 @@ jobs:
       - name: Copy files to repository
         run: |
           rm -rf ${{ env.laravel-directory }}/src
-          mv build/Appto/TelegramBot ${{ env.laravel-directory }}/src
+          mv build ${{ env.laravel-directory }}/src
           cd ${{ env.laravel-directory }}
           git status
           git diff --stat
