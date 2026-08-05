@@ -276,6 +276,11 @@ class Generator implements GeneratorInterface
 
             $this->addUse($namespace, $docType, $item['name']);
 
+            // fix: InlineKeyboardButton[][] -> array<InlineKeyboardButton[]>
+            if ($phpType === 'array' && str_contains($docType, '[][]')) {
+                $docType = $this->typeResolver->wrapNestedArrayType($docType);
+            }
+
             $comment = sprintf(
                 '@var  %s%s  %s',
                 $docType,

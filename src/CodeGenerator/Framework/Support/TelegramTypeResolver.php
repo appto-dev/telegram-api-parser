@@ -32,6 +32,27 @@ final class TelegramTypeResolver
         return $this->resolve($type, fqcn: false);
     }
 
+    /**
+     * Из PhotoSize[][] сделает array<PhotoSize[]> чтобы Spatie смог резолвить данные
+     */
+    public function wrapNestedArrayType(string $docType): string {
+        return preg_replace_callback(
+            '/([^\[\]]+)((?:\[\]){2,})/',
+            static function (array $m): string {
+                [, $base, $brackets] = $m;
+                $depth = (int) (strlen($brackets) / 2);
+
+                $result = $base . '[]';
+                for ($i = 1; $i < $depth; $i++) {
+                    $result = "array<{$result}>";
+                }
+
+                return $result;
+            },
+            $docType
+        ) ?? $docType;
+    }
+
     private function resolveArrayDocType(array $type): string {
         // ["InputMediaAudio"] - обычный "Array of X"
         if (count($type) === 1) {
@@ -65,4 +86,5 @@ final class TelegramTypeResolver
 
         return $fqcn ? $this->namespace.'\\'.$type : $type;
     }
+
 }
